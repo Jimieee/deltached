@@ -1,0 +1,17 @@
+{
+  "name": "deltached-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter docs dev",
+    "dev:lib": "pnpm --filter deltached dev",
+    "build": "pnpm --filter deltached build && pnpm --filter docs build",
+    "build:lib": "pnpm --filter deltached build",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "pnpm build:lib && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.0"
+  }
+}

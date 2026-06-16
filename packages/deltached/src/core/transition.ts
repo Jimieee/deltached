@@ -74,7 +74,7 @@ const PIN_VARS: gsap.TweenVars = {
 const TARGET_RESET_PROPS =
   "position,top,left,right,bottom,margin,minWidth,minHeight,maxWidth,maxHeight," +
   "boxSizing,overflow,width,height,transform,opacity,visibility," +
-  "borderRadius,backgroundColor";
+  "borderRadius,backgroundColor,padding";
 const CONTENT_RESET_PROPS = "opacity,visibility,filter";
 
 /**

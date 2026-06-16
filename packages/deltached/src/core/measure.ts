@@ -50,5 +50,11 @@ export function measureGeometry(el: HTMLElement): ElementGeometry {
     rect,
     borderRadius: resolveBorderRadius(style, rect),
     backgroundColor: style.backgroundColor,
+    padding: {
+      top: parseFloat(style.paddingTop) || 0,
+      right: parseFloat(style.paddingRight) || 0,
+      bottom: parseFloat(style.paddingBottom) || 0,
+      left: parseFloat(style.paddingLeft) || 0,
+    },
   };
 }

@@ -1,0 +1,186 @@
+---
+import Base from "../layouts/Base.astro";
+const avatar = "https://i.pravatar.cc/320?img=12";
+---
+
+<Base title="deltached — playground">
+  <main>
+    <header>
+      <h1>deltached</h1>
+      <p>
+        Click the card. The avatar and name <em>persist</em> across the morph.
+      </p>
+    </header>
+
+    <!-- source: the collapsed card -->
+    <button class="card" id="source" aria-label="Open profile">
+      <img class="card-avatar" data-deltached-id="avatar" src={avatar} alt="" />
+      <span class="card-name" data-deltached-id="name">Ada Lovelace</span>
+    </button>
+
+    <!-- target: the expanded modal (hidden until enter) -->
+    <div class="overlay" id="overlay" hidden>
+      <div class="backdrop" id="backdrop"></div>
+      <article class="modal" id="target">
+        <img
+          class="modal-avatar"
+          data-deltached-id="avatar"
+          src={avatar}
+          alt=""
+        />
+        <h2 class="modal-name" data-deltached-id="name">Ada Lovelace</h2>
+        <p class="modal-body" id="body">
+          Mathematician and writer, chiefly known for her work on Charles
+          Babbage's proposed Analytical Engine — and regarded as the first to
+          recognise that the machine had applications beyond pure calculation.
+        </p>
+        <button class="modal-close" id="close">Close</button>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    import { DeltachedTransition } from "deltached";
+
+    const $ = <T extends HTMLElement>(id: string) =>
+      document.getElementById(id) as T;
+
+    const source = $<HTMLButtonElement>("source");
+    const target = $<HTMLElement>("target");
+    const backdrop = $<HTMLElement>("backdrop");
+    const overlay = $<HTMLElement>("overlay");
+    const body = $<HTMLElement>("body");
+    const close = $<HTMLButtonElement>("close");
+
+    const transition = new DeltachedTransition({
+      target,
+      source,
+      backdrop,
+      // Only the non-persisted content crossfades; the avatar + name are
+      // handled by persist so they fly between the two layouts.
+      content: () => [body, close],
+      persist: { debug: true },
+      hooks: {
+        beforeEnter: () => {
+          overlay.hidden = false;
+        },
+        afterLeave: () => {
+          overlay.hidden = true;
+        },
+      },
+    });
+
+    source.addEventListener("click", () => transition.enter());
+    backdrop.addEventListener("click", () => transition.leave());
+    close.addEventListener("click", () => transition.leave());
+  </script>
+
+  <style is:global>
+    main {
+      display: grid;
+      gap: 2.5rem;
+      justify-items: center;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: 2.25rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+    header p {
+      margin: 0;
+      color: var(--muted);
+    }
+    header em {
+      color: var(--fg);
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    /* collapsed card (source) */
+    .card {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1.25rem 0.5rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      transition:
+        border-color 0.15s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+    .card-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .card-name {
+      font-weight: 600;
+    }
+
+    /* expanded modal (target) */
+    .overlay[hidden] {
+      display: none;
+    }
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: var(--ink);
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      margin: auto;
+      width: min(440px, 92vw);
+      height: fit-content;
+      max-height: 85vh;
+      display: grid;
+      justify-items: center;
+      gap: 1rem;
+      padding: 2.5rem 2rem;
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+      overflow: auto;
+    }
+    .modal-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .modal-name {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .modal-body {
+      margin: 0;
+      color: var(--muted);
+    }
+    .modal-close {
+      margin-top: 0.5rem;
+      padding: 0.65rem 1.5rem;
+      border: 0;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--ink-fg);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .modal-close:hover {
+      opacity: 0.85;
+    }
+  </style>
+</Base>

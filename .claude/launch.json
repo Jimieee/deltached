@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "docs",
+      "runtimeExecutable": "wsl.exe",
+      "runtimeArgs": [
+        "-d",
+        "ubuntu-24.04",
+        "bash",
+        "-lic",
+        "cd ~/code/libraries/deltached && pnpm dev"
+      ],
+      "port": 4321
+    }
+  ]
+}

@@ -19,9 +19,14 @@ export function blurVars(px: number, value: number): gsap.TweenVars {
  *
  * Shape preservation: the morph animates the element's real box — translate
  * (compositor-friendly) plus actual width/height — and interpolates
- * borderRadius/backgroundColor as real CSS values. No scale is ever applied,
- * so the element can't stretch, its radius stays geometrically correct at
- * every frame, and content never inherits a non-uniform distortion.
+ * borderRadius/backgroundColor/padding as real CSS values. No scale is ever
+ * applied, so the element can't stretch, its radius stays geometrically
+ * correct at every frame, and content never inherits a non-uniform distortion.
+ *
+ * Padding is interpolated edge by edge so the surface's content box tracks the
+ * morph: it holds the source's padding at the source end and the target's at
+ * the target end. Without this the (fixed) padding would keep in-flow content
+ * offset from the source once the box has shrunk onto it.
  *
  * Assumes the element is pinned at the viewport origin
  * (`position: fixed; top: 0; left: 0`), so rect coordinates map 1:1 to x/y.
@@ -34,6 +39,10 @@ export function frameVars(geo: ElementGeometry): gsap.TweenVars {
     height: geo.rect.height,
     borderRadius: geo.borderRadius,
     backgroundColor: geo.backgroundColor,
+    paddingTop: geo.padding.top,
+    paddingRight: geo.padding.right,
+    paddingBottom: geo.padding.bottom,
+    paddingLeft: geo.padding.left,
   };
 }
 

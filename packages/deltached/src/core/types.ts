@@ -13,11 +13,26 @@ export interface Rect {
   height: number;
 }
 
+/** Resolved padding (px) for each edge. */
+export interface EdgeInsets {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
 /** Visual snapshot of an element taken during the read phase. */
 export interface ElementGeometry {
   rect: Rect;
   borderRadius: string;
   backgroundColor: string;
+  /**
+   * The element's own padding. Interpolated during the morph so the surface
+   * adopts the source's content box at the source end and the target's at the
+   * target end — otherwise the (fixed) padding would push in-flow content out
+   * of alignment once the box has shrunk onto the source.
+   */
+  padding: EdgeInsets;
 }
 
 /**

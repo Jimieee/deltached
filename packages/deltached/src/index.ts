@@ -10,7 +10,7 @@ export {
   LEAVE_EASE,
   registerEase,
 } from "./core/config";
-export { prefersReducedMotion } from "./core/dom";
+export { MORPHING_ATTRIBUTE, prefersReducedMotion } from "./core/dom";
 export {
   animatePersistPair,
   persistFrameVars,

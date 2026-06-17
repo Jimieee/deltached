@@ -2,16 +2,22 @@ import {
   destroyFontWeightProximity,
   initFontWeightProximity,
 } from "./font-weight-proximity";
+import { initModals } from "./modal";
 
-function initAnimations() {
+let teardownModals: (() => void) | null = null;
+
+function initPage() {
   initFontWeightProximity();
+  teardownModals = initModals();
 }
 
-function destroyAnimations() {
+function destroyPage() {
   destroyFontWeightProximity();
+  teardownModals?.();
+  teardownModals = null;
 }
 
-initAnimations();
+initPage();
 
-document.addEventListener("astro:page-load", initAnimations);
-document.addEventListener("astro:before-swap", destroyAnimations);
+document.addEventListener("astro:page-load", initPage);
+document.addEventListener("astro:before-swap", destroyPage);

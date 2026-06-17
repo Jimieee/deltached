@@ -12,8 +12,10 @@ import { ensureEases, resolveTimings } from "./config";
 import {
   clearWillChange,
   isBrowser,
+  markMorphing,
   prefersReducedMotion,
   setWillChange,
+  unmarkMorphing,
 } from "./dom";
 import { measureGeometry } from "./measure";
 import {
@@ -90,7 +92,10 @@ const CONTENT_RESET_PROPS = "opacity,visibility,filter";
  * as temporary layers in a fixed overlay; see `persistSession.ts`.
  *
  * The controller owns measurement, animation, and visibility. Everything
- * else (CSS classes, scroll lock, focus, mounting) belongs in hooks.
+ * else (CSS classes, scroll lock, focus, mounting) belongs in hooks — the one
+ * exception is `data-deltached-morphing`, which it sets on the source and
+ * target while it drives their opacity/visibility/transform so consumer CSS
+ * can suppress its own transitions during the handoff (see `dom.ts`).
  */
 export class DeltachedTransition {
   private readonly target: HTMLElement;
@@ -110,6 +115,10 @@ export class DeltachedTransition {
   private activeContent: HTMLElement[] = [];
   private persistSession: PersistSession | null = null;
   private settle: ((completed: boolean) => void) | null = null;
+  // Bumped whenever a transition begins. A deferred unmark captures the value
+  // at schedule time and only fires if it's still current, so a transition
+  // that re-claims the elements before the next frame keeps them marked.
+  private morphGen = 0;
 
   constructor(config: DeltachedConfig) {
     if (!config?.target) {
@@ -172,6 +181,7 @@ export class DeltachedTransition {
     this.cancelActive(reuseSession);
     this.source = from;
     this.phaseValue = "entering";
+    this.morphGen++;
 
     const t = this.timings;
     const content = (this.activeContent = this.resolveContent());
@@ -185,10 +195,17 @@ export class DeltachedTransition {
     return new Promise((resolve) => {
       this.settle = resolve;
       this.ctx!.add(() => {
+        // Claim both elements before any opacity/visibility write below, so a
+        // consumer transition can't animate the handoff. Same synchronous
+        // frame as the gsap.set calls — the suppression is in place first.
+        markMorphing(this.target);
+        markMorphing(from);
+
         // If a leave was interrupted, a different origin may have been left
         // mid-handoff; restore it before adopting the new one.
         if (prevSource && prevSource !== from && prevSource.isConnected) {
           gsap.set(prevSource, { clearProps: "opacity,visibility" });
+          unmarkMorphing(prevSource);
         }
 
         let tl: gsap.core.Timeline;
@@ -271,6 +288,7 @@ export class DeltachedTransition {
     const reuseSession = resumable && !!this.persistSession;
     this.cancelActive(reuseSession);
     this.phaseValue = "leaving";
+    this.morphGen++;
 
     const t = this.timings;
     const source = this.source?.isConnected ? this.source : null;
@@ -288,6 +306,12 @@ export class DeltachedTransition {
       this.settle = resolve;
       this.ctx!.add(() => {
         this.hooks.beforeLeave?.();
+
+        // Re-claim the target (released after enter settled) and keep the
+        // source claimed through the return handoff, so neither animates the
+        // visibility writes below on its own.
+        markMorphing(this.target);
+        markMorphing(source);
 
         let tl: gsap.core.Timeline;
         if (prefersReducedMotion() || !source) {
@@ -345,6 +369,10 @@ export class DeltachedTransition {
     this.ctx?.revert();
     this.ctx = null;
     if (isBrowser) clearWillChange(this.target);
+    // Invalidate any pending deferred unmark, then drop the attribute now.
+    this.morphGen++;
+    unmarkMorphing(this.target);
+    unmarkMorphing(this.source);
     this.naturalGeo = null;
     this.source = null;
     this.pinned = false;
@@ -366,6 +394,10 @@ export class DeltachedTransition {
       gsap.set(this.activeContent, { clearProps: CONTENT_RESET_PROPS });
     }
     clearWillChange(this.target);
+    // The target is back in flow at its open frame; release it next frame so
+    // its CSS transitions are live for the open state. The source stays
+    // claimed — it's still hidden until the matching leave restores it.
+    this.scheduleUnmark(this.target);
     this.tl = null;
     this.phaseValue = "open";
     this.hooks.afterEnter?.();
@@ -392,12 +424,34 @@ export class DeltachedTransition {
       gsap.set(this.backdrop, { clearProps: "opacity,visibility" });
     }
     clearWillChange(this.target);
+    // Release both next frame: the source's opacity was just restored to its
+    // resting value with transitions still suppressed, so re-enabling them now
+    // (this frame) would animate that 0 -> 1 jump — the exact fade we prevent.
+    this.scheduleUnmark(source);
+    this.scheduleUnmark(this.target);
     this.tl = null;
     this.naturalGeo = null;
     this.source = null;
     this.phaseValue = "idle";
     this.hooks.afterLeave?.();
     this.resolveSettle(true);
+  }
+
+  /**
+   * Drops `data-deltached-morphing` from an element one frame later, but only
+   * if no newer transition has re-claimed it since (see `morphGen`). The frame
+   * delay is essential: the element's final opacity/transform was committed
+   * this frame with transitions off, so removing the attribute now would let a
+   * consumer transition fire on that settle.
+   */
+  private scheduleUnmark(el: HTMLElement | null): void {
+    if (!el) return;
+    const gen = this.morphGen;
+    const run = () => {
+      if (this.morphGen === gen) unmarkMorphing(el);
+    };
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(run);
+    else run();
   }
 
   private cancelActive(preserveSession = false): void {

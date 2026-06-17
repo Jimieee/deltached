@@ -22,3 +22,21 @@ export function setWillChange(el: HTMLElement, value = "transform"): void {
 export function clearWillChange(el: HTMLElement): void {
   el.style.willChange = "";
 }
+
+/**
+ * Present on an element while a morph is driving its opacity/visibility/
+ * transform. deltached toggles these to hand a source off to (and back from)
+ * the morph surface; a consumer CSS transition on those properties would
+ * otherwise animate the handoff — e.g. a trigger button fading on its own
+ * every time it disappears and reappears around the morph. Consumers opt out
+ * with `[data-deltached-morphing] { transition: none }`.
+ */
+export const MORPHING_ATTRIBUTE = "data-deltached-morphing";
+
+export function markMorphing(el: HTMLElement | null | undefined): void {
+  el?.setAttribute(MORPHING_ATTRIBUTE, "");
+}
+
+export function unmarkMorphing(el: HTMLElement | null | undefined): void {
+  el?.removeAttribute(MORPHING_ATTRIBUTE);
+}

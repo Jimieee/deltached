@@ -139,11 +139,15 @@ export function buildLeaveTimeline(
   }
 
   if (els.source && handoff > 0) {
-    tl.to(
-      els.source,
-      { autoAlpha: 1, duration: handoff, ease: "power1.inOut" },
-      d - handoff,
-    );
+    // Reveal the source at full opacity the instant the handoff opens, sitting
+    // solid behind the still-opaque morph surface (which stacks above it), then
+    // fade only the surface out over it. Cross-fading the source IN instead
+    // would dip the composite: two identical semi-transparent surfaces over the
+    // background never sum back to full coverage, so the overlap reads as a
+    // brief darkening before it corrects. With the source already solid, the
+    // box stays fully covered at every frame — the surface dissolving away
+    // still blends surface→source appearance, just without the brightness dip.
+    tl.set(els.source, { autoAlpha: 1 }, d - handoff);
     tl.to(
       els.target,
       { opacity: 0, duration: handoff, ease: "power1.inOut" },

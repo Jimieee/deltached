@@ -13,7 +13,7 @@ export interface Rect {
   height: number;
 }
 
-/** Resolved padding (px) for each edge. */
+/** padding (px) for each edge. */
 export interface EdgeInsets {
   top: number;
   right: number;

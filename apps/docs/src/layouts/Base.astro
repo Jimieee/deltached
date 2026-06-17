@@ -1,6 +1,7 @@
 ---
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
+import BottomNav from "../components/BottomNav.astro";
 import Navbar from "../components/Navbar.astro";
 
 interface Props {
@@ -23,10 +24,13 @@ const {
   </head>
   <body>
     <Navbar />
+    <BottomNav />
     <slot />
 
     <style is:global>
       :root {
+        color-scheme: light;
+
         /* minimalist black-on-white palette */
         --bg: #ffffff;
         --fg: #171717;
@@ -36,8 +40,18 @@ const {
         --surface: #ffffff;
         --border: #e6e6e6;
 
+        /* nav design tokens */
+        --nav-size: 64px;
+        --nav-size-sm: 56px;
+        --nav-radius: 999px;
+        --ease: 0.15s ease;
+        --hover-tint: rgba(255, 255, 255, 0.12);
+
         font-family:
-          "Geist Variable", system-ui, -apple-system, sans-serif;
+          "Geist Variable",
+          system-ui,
+          -apple-system,
+          sans-serif;
         font-synthesis: none;
         -webkit-font-smoothing: antialiased;
         text-rendering: optimizeLegibility;
@@ -60,6 +74,17 @@ const {
       kbd {
         font-family: "Geist Mono Variable", ui-monospace, monospace;
       }
+
+      /* keep content clear of the fixed bottom nav on mobile */
+      @media (max-width: 768px) {
+        /* body {
+          padding-bottom: calc(
+            var(--nav-size-sm) + 2rem + env(safe-area-inset-bottom)
+          );
+        } */
+      }
     </style>
+
+    <script src="../scripts/main.ts"></script>
   </body>
 </html>

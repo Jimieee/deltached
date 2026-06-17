@@ -1,186 +1,104 @@
 ---
 import Base from "../layouts/Base.astro";
-const avatar = "https://i.pravatar.cc/320?img=12";
+import InstallCommandsModal from "../components/InstallCommandsModal.astro";
 ---
 
-<Base title="deltached — playground">
-  <main>
-    <header>
-      <h1>deltached</h1>
-      <p>
-        Click the card. The avatar and name <em>persist</em> across the morph.
-      </p>
-    </header>
+<Base title="Deltached.">
+  <main class="hero center">
+    <section class="panel">
+      <div class="content">
+        <h1 class="events-none" data-animate="font-weight">Deltached.</h1>
 
-    <!-- source: the collapsed card -->
-    <button class="card" id="source" aria-label="Open profile">
-      <img class="card-avatar" data-deltached-id="avatar" src={avatar} alt="" />
-      <span class="card-name" data-deltached-id="name">Ada Lovelace</span>
-    </button>
-
-    <!-- target: the expanded modal (hidden until enter) -->
-    <div class="overlay" id="overlay" hidden>
-      <div class="backdrop" id="backdrop"></div>
-      <article class="modal" id="target">
-        <img
-          class="modal-avatar"
-          data-deltached-id="avatar"
-          src={avatar}
-          alt=""
-        />
-        <h2 class="modal-name" data-deltached-id="name">Ada Lovelace</h2>
-        <p class="modal-body" id="body">
-          Mathematician and writer, chiefly known for her work on Charles
-          Babbage's proposed Analytical Engine — and regarded as the first to
-          recognise that the machine had applications beyond pure calculation.
+        <p class="events-none">
+          An interruptible in-page shared element controller. GSAP-powered box
+          morphing, geometric pinning, and child-layer persistence — layout
+          continuity under any interaction.
         </p>
-        <button class="modal-close" id="close">Close</button>
-      </article>
-    </div>
+
+        <InstallCommandsModal />
+      </div>
+    </section>
   </main>
-
-  <script>
-    import { DeltachedTransition } from "deltached";
-
-    const $ = <T extends HTMLElement>(id: string) =>
-      document.getElementById(id) as T;
-
-    const source = $<HTMLButtonElement>("source");
-    const target = $<HTMLElement>("target");
-    const backdrop = $<HTMLElement>("backdrop");
-    const overlay = $<HTMLElement>("overlay");
-    const body = $<HTMLElement>("body");
-    const close = $<HTMLButtonElement>("close");
-
-    const transition = new DeltachedTransition({
-      target,
-      source,
-      backdrop,
-      // Only the non-persisted content crossfades; the avatar + name are
-      // handled by persist so they fly between the two layouts.
-      content: () => [body, close],
-      persist: { debug: true },
-      hooks: {
-        beforeEnter: () => {
-          overlay.hidden = false;
-        },
-        afterLeave: () => {
-          overlay.hidden = true;
-        },
-      },
-    });
-
-    source.addEventListener("click", () => transition.enter());
-    backdrop.addEventListener("click", () => transition.leave());
-    close.addEventListener("click", () => transition.leave());
-  </script>
-
-  <style is:global>
-    main {
-      display: grid;
-      gap: 2.5rem;
-      justify-items: center;
-      text-align: center;
-      padding: 4rem 2rem;
-    }
-    header h1 {
-      margin: 0 0 0.5rem;
-      font-size: 2.25rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
-    }
-    header p {
-      margin: 0;
-      color: var(--muted);
-    }
-    header em {
-      color: var(--fg);
-      font-style: normal;
-      font-weight: 600;
-    }
-
-    /* collapsed card (source) */
-    .card {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 1.25rem 0.5rem 0.5rem;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: var(--surface);
-      color: inherit;
-      cursor: pointer;
-      font: inherit;
-      transition:
-        border-color 0.15s ease,
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
-    }
-    .card-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .card-name {
-      font-weight: 600;
-    }
-
-    /* expanded modal (target) */
-    .overlay[hidden] {
-      display: none;
-    }
-    .backdrop {
-      position: fixed;
-      inset: 0;
-      background: var(--ink);
-    }
-    .modal {
-      position: fixed;
-      inset: 0;
-      margin: auto;
-      width: min(440px, 92vw);
-      height: fit-content;
-      max-height: 85vh;
-      display: grid;
-      justify-items: center;
-      gap: 1rem;
-      padding: 2.5rem 2rem;
-      border-radius: 28px;
-      background: var(--surface);
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
-      overflow: auto;
-    }
-    .modal-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .modal-name {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    .modal-body {
-      margin: 0;
-      color: var(--muted);
-    }
-    .modal-close {
-      margin-top: 0.5rem;
-      padding: 0.65rem 1.5rem;
-      border: 0;
-      border-radius: 999px;
-      background: var(--ink);
-      color: var(--ink-fg);
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s ease;
-    }
-    .modal-close:hover {
-      opacity: 0.85;
-    }
-  </style>
 </Base>
+
+<style>
+  .center {
+    display: grid;
+  }
+
+  .hero {
+    width: 100%;
+    min-height: calc(100dvh - 112px);
+    min-width: 0;
+
+    padding: 0 1rem 1rem;
+    overflow: hidden;
+  }
+
+  .panel {
+    width: 100%;
+    min-height: 100%;
+    min-width: 0;
+
+    display: grid;
+    place-items: center;
+
+    padding: clamp(1.5rem, 5vw, 5rem);
+
+    overflow: hidden;
+    background: var(--fg);
+    color: var(--ink-fg);
+    border-radius: 2rem;
+    box-sizing: border-box;
+  }
+
+  .content {
+    width: min(100%, 42rem);
+    text-align: center;
+  }
+
+  .events-none {
+    pointer-events: none;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(3.5rem, 9vw, 6rem);
+    font-weight: 300;
+    line-height: 0.95;
+  }
+
+  p {
+    max-width: 38rem;
+    margin: 1rem auto 0;
+    font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+    line-height: 1.45;
+    opacity: 0.72;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: max(0.5rem, env(safe-area-inset-top))
+        max(0.5rem, env(safe-area-inset-right))
+        max(0.5rem, env(safe-area-inset-bottom))
+        max(0.5rem, env(safe-area-inset-left));
+    }
+
+    .panel {
+      width: 100%;
+      height: 100%;
+      border-radius: 1.25rem;
+      padding-top: calc(var(--nav-size-sm) + 3rem);
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+      padding-inline: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 17vw, 5rem);
+    }
+
+    p {
+      font-size: 0.78rem;
+    }
+  }
+</style>

@@ -1,0 +1,53 @@
+---
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+
+interface Props {
+  name: string;
+  size?: number;
+  variant?: "outline" | "filled";
+  class?: string;
+}
+
+const {
+  name,
+  size = 24,
+  variant = "outline",
+  class: className,
+} = Astro.props;
+
+const require = createRequire(import.meta.url);
+
+let inner: string;
+
+try {
+  const iconFile = require.resolve(`@tabler/icons/${variant}/${name}.svg`);
+  inner = readFileSync(iconFile, "utf8");
+} catch {
+  throw new Error(`Tabler icon not found: ${variant}/${name}`);
+}
+---
+
+<span
+  class:list={["icon", className]}
+  style={`--icon-size: ${size}px`}
+  aria-hidden="true"
+  set:html={inner}
+/>
+
+<style>
+  .icon {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  .icon :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+</style>

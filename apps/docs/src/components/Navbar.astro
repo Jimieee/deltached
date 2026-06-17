@@ -1,68 +1,52 @@
 ---
-const links = [
-  { label: "Home", href: "/" },
-  { label: "Examples", href: "/examples" },
-  { label: "Roadmap", href: "/roadmap" },
-  { label: "Changelog", href: "/changelog" },
-];
+import { isActive, navItems, NPM, REPO } from "../config/nav";
+import Icon from "./Icon.astro";
 
 const pathname = Astro.url.pathname;
-const isActive = (href: string) =>
-  href === "/" ? pathname === "/" : pathname.startsWith(href);
-
-const REPO = "https://github.com/Jimieee/deltached";
-const NPM = "https://www.npmjs.com/package/deltached";
 ---
 
 <nav class="nav" aria-label="Primary">
-  <!-- left circle: logo / home -->
   <a class="circle" href="/" aria-label="deltached — home">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3 21 12 12 21 3 12Z" fill="currentColor"></path>
-    </svg>
+    <Icon name="diamond" size={26} />
   </a>
 
-  <!-- center pill: nav links -->
-  <div class="pill">
+  <!-- text links: desktop only (mobile uses the bottom nav) -->
+  <ul class="links" role="list">
     {
-      links.map((l) => (
-        <a
-          class:list={["pill-link", { active: isActive(l.href) }]}
-          href={l.href}
-          aria-current={isActive(l.href) ? "page" : undefined}
-        >
-          {l.label}
-        </a>
+      navItems.map((l) => (
+        <li>
+          <a
+            class:list={["link", { active: isActive(pathname, l.href) }]}
+            href={l.href}
+            aria-current={isActive(pathname, l.href) ? "page" : undefined}
+          >
+            {l.label}
+          </a>
+        </li>
       ))
     }
-  </div>
+  </ul>
 
-  <!-- right circles: links / logos -->
-  <a
-    class="circle"
-    href={REPO}
-    target="_blank"
-    rel="noreferrer"
-    aria-label="GitHub"
-  >
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M12 2A10 10 0 0 0 8.84 21.5c.5.08.66-.22.66-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.1-1.47-1.1-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.85v2.74c0 .27.16.57.67.48A10 10 0 0 0 12 2Z"
-      ></path>
-    </svg>
-  </a>
-  <a
-    class="circle"
-    href={NPM}
-    target="_blank"
-    rel="noreferrer"
-    aria-label="npm"
-  >
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="currentColor" d="M3 3h18v18h-9V7.5H7.5V21H3V3Z"></path>
-    </svg>
-  </a>
+  <div class="external">
+    <a
+      class="circle"
+      href={REPO}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="GitHub"
+    >
+      <Icon name="brand-github" size={26} />
+    </a>
+    <a
+      class="circle"
+      href={NPM}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="npm"
+    >
+      <Icon name="brand-npm" size={24} />
+    </a>
+  </div>
 </nav>
 
 <style>
@@ -72,13 +56,12 @@ const NPM = "https://www.npmjs.com/package/deltached";
     justify-content: center;
     gap: 0.75rem;
     padding: 1.5rem 1rem;
-    flex-wrap: wrap;
   }
 
   .circle {
     flex: 0 0 auto;
-    width: 64px;
-    height: 64px;
+    width: var(--nav-size);
+    height: var(--nav-size);
     display: grid;
     place-items: center;
     border-radius: 50%;
@@ -86,55 +69,67 @@ const NPM = "https://www.npmjs.com/package/deltached";
     color: var(--ink-fg);
     text-decoration: none;
     transition:
-      transform 0.15s ease,
-      opacity 0.15s ease;
-  }
-  .circle svg {
-    width: 26px;
-    height: 26px;
+      transform var(--ease),
+      opacity var(--ease);
   }
 
-  .pill {
+  .links {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    height: 64px;
+    height: var(--nav-size);
+    margin: 0;
     padding: 0 0.75rem;
-    border-radius: 999px;
+    list-style: none;
+    border-radius: var(--nav-radius);
     background: var(--ink);
   }
 
-  .pill-link {
+  .link {
+    display: block;
     padding: 0.5rem 0.95rem;
-    border-radius: 999px;
+    border-radius: var(--nav-radius);
     color: var(--ink-fg);
     text-decoration: none;
     font-size: 1.05rem;
     font-weight: 500;
     opacity: 0.75;
     transition:
-      opacity 0.15s ease,
-      background 0.15s ease;
+      opacity var(--ease),
+      background var(--ease);
   }
-  .pill-link:hover {
+  .link:hover,
+  .link:focus-visible {
     opacity: 1;
   }
-  .pill-link.active {
+  .link.active {
     opacity: 1;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--hover-tint);
   }
 
-  @media (max-width: 540px) {
-    .pill-link {
-      padding: 0.5rem 0.6rem;
-      font-size: 0.95rem;
+  .external {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* mobile: header role only — logo left, externals right; pages move to the
+     bottom nav, so the text links are hidden. */
+  @media (max-width: 768px) {
+    .nav {
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 1rem;
+    }
+    .links {
+      display: none;
     }
     .circle {
-      width: 56px;
-      height: 56px;
+      width: var(--nav-size-sm);
+      height: var(--nav-size-sm);
     }
-    .pill {
-      height: 56px;
+    .external {
+      gap: 0.5rem;
     }
   }
 </style>

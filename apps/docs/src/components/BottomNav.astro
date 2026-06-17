@@ -1,0 +1,131 @@
+---
+import { isActive, navItems } from "../config/nav";
+
+const pathname = Astro.url.pathname;
+
+const foundIndex = navItems.findIndex((item) => isActive(pathname, item.href));
+
+const activeIndex = foundIndex >= 0 ? foundIndex : 0;
+
+const before = navItems.slice(0, activeIndex);
+const activeItem = navItems[activeIndex];
+const after = navItems.slice(activeIndex + 1);
+---
+
+<nav class="bottom-nav" aria-label="Pages">
+  {
+    before.length > 0 && (
+      <ul class="pill" role="list">
+        {before.map((item) => (
+          <li>
+            <a class="link" href={item.href}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  <a class="chip active" href={activeItem.href} aria-current="page">
+    {activeItem.label}
+  </a>
+
+  {
+    after.length > 0 && (
+      <ul class="pill" role="list">
+        {after.map((item) => (
+          <li>
+            <a class="link" href={item.href}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</nav>
+
+<style>
+  /* desktop hides it entirely; the top navbar owns navigation there. */
+  .bottom-nav {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      position: fixed;
+      left: 50%;
+      bottom: calc(0.85rem + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      max-width: calc(100vw - 1rem);
+      z-index: 50;
+    }
+  }
+
+  /* shared sizing for chips and the pill so they line up */
+  .chip,
+  .pill {
+    height: 2.6rem;
+    border-radius: var(--nav-radius);
+  }
+
+  /* one item = one chip; the active one is inverted (light on the dark bar) */
+  .chip {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    background: var(--ink);
+    color: var(--ink-fg);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity var(--ease);
+  }
+  .chip:not(.active) {
+    opacity: 0.85;
+  }
+  .chip:not(.active):hover,
+  .chip:not(.active):focus-visible {
+    opacity: 1;
+  }
+  .chip.active {
+    background: var(--ink);
+    color: var(--ink-fg);
+    font-weight: 600;
+  }
+
+  /* the rest live together in a single pill */
+  .pill {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    margin: 0;
+    padding: 0 0.3rem;
+    list-style: none;
+    background: var(--ink);
+  }
+  .link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.55rem;
+    height: 1.9rem;
+    border-radius: var(--nav-radius);
+    color: var(--ink-fg);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    opacity: 0.7;
+    transition: opacity var(--ease);
+  }
+  .link:hover,
+  .link:focus-visible {
+    opacity: 1;
+  }
+</style>

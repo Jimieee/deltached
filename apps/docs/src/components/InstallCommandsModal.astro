@@ -1,0 +1,168 @@
+---
+import Icon from "./Icon.astro";
+import Modal from "./Modal.astro";
+
+const modalId = "install-commands-modal";
+
+const commands = [
+  "npm install deltached",
+  "pnpm add deltached",
+  "yarn add deltached",
+  "bun add deltached",
+];
+---
+
+<button class="trigger" type="button" data-install-modal-open>
+  view install commands
+</button>
+
+<Modal id={modalId} title="Install deltached">
+  <div class="commands" role="list">
+    {
+      commands.map((command) => (
+        <div class="command" role="listitem">
+          <span class="prompt" aria-hidden="true">
+            $
+          </span>
+          <code>{command}</code>
+          <button
+            class="copy"
+            type="button"
+            data-copy-command={command}
+            aria-label={`Copy ${command}`}
+          >
+            <Icon name="copy" size={18} />
+          </button>
+        </div>
+      ))
+    }
+  </div>
+</Modal>
+
+<style>
+  .trigger {
+    margin-top: clamp(2rem, 6vh, 4rem);
+    min-width: 12rem;
+    height: 2.75rem;
+    padding-inline: 1.4rem;
+
+    border: 0;
+    border-radius: var(--nav-radius);
+
+    background: var(--surface);
+    color: var(--fg);
+
+    font: inherit;
+    cursor: pointer;
+    transition:
+      transform var(--ease),
+      opacity var(--ease);
+  }
+
+  .trigger:hover,
+  .trigger:focus-visible {
+    opacity: 0.9;
+  }
+
+  .trigger:active {
+    transform: scale(0.98);
+  }
+
+  .commands {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .command {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) 2.85rem;
+    align-items: center;
+    min-height: 2.75rem;
+    overflow: hidden;
+
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .prompt {
+    padding-left: 0.85rem;
+    color: var(--muted);
+    font-family: "Geist Mono Variable", ui-monospace, monospace;
+    font-size: 0.9rem;
+  }
+
+  code {
+    min-width: 0;
+    overflow: hidden;
+    padding: 0 0.7rem;
+    color: #4b5563;
+    font-size: 0.9rem;
+    line-height: 1;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .copy {
+    width: 2.85rem;
+    height: 100%;
+    border: 0;
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition:
+      color var(--ease),
+      background var(--ease),
+      transform var(--ease);
+  }
+
+  .copy:hover,
+  .copy:focus-visible {
+    color: var(--fg);
+    background: #f7f7f7;
+  }
+
+  .copy:active {
+    transform: scale(0.96);
+  }
+
+  .copy[data-copied="true"] {
+    color: var(--fg);
+    background: #f0fdf4;
+  }
+</style>
+
+<script>
+  const modal = document.querySelector<HTMLDialogElement>(
+    "#install-commands-modal",
+  );
+  const trigger = document.querySelector<HTMLButtonElement>(
+    "[data-install-modal-open]",
+  );
+
+  trigger?.addEventListener("click", () => modal?.showModal());
+
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-copy-command]")
+    .forEach((button) => {
+      button.addEventListener("click", async () => {
+        const command = button.dataset.copyCommand;
+
+        if (!command) {
+          return;
+        }
+
+        await navigator.clipboard.writeText(command);
+        button.dataset.copied = "true";
+
+        window.setTimeout(() => {
+          delete button.dataset.copied;
+        }, 900);
+      });
+    });
+</script>

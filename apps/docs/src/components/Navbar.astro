@@ -1,13 +1,14 @@
 ---
 import { isActive, navItems, NPM, REPO } from "../config/nav";
 import Icon from "./Icon.astro";
+import Logo from "./Logo.astro";
 
 const pathname = Astro.url.pathname;
 ---
 
 <nav class="nav" aria-label="Primary">
   <a class="circle" href="/" aria-label="deltached — home">
-    <Icon name="diamond" size={26} />
+    <Logo size={32} />
   </a>
 
   <!-- text links: desktop only (mobile uses the bottom nav) -->
@@ -35,7 +36,7 @@ const pathname = Astro.url.pathname;
       rel="noreferrer"
       aria-label="GitHub"
     >
-      <Icon name="brand-github" size={26} />
+      <Icon name="brand-github" size={32} />
     </a>
     <a
       class="circle"
@@ -44,7 +45,7 @@ const pathname = Astro.url.pathname;
       rel="noreferrer"
       aria-label="npm"
     >
-      <Icon name="brand-npm" size={24} />
+      <Icon name="brand-npm" size={32} />
     </a>
   </div>
 </nav>
@@ -71,6 +72,11 @@ const pathname = Astro.url.pathname;
     transition:
       transform var(--ease),
       opacity var(--ease);
+  }
+
+  .circle:hover,
+  .circle:focus-visible {
+    opacity: 0.9;
   }
 
   .links {

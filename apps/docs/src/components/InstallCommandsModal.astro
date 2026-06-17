@@ -28,10 +28,16 @@ const commands = [
           <button
             class="copy"
             type="button"
-            data-copy-command={command}
+            data-copy={command}
             aria-label={`Copy ${command}`}
           >
-            <Icon name="copy" size={18} />
+            <span class="copy-icon" data-copy-icon="copy">
+              <Icon name="copy" size={18} />
+            </span>
+
+            <span class="copy-icon copy-icon--check" data-copy-icon="check">
+              <Icon name="check" size={18} />
+            </span>
           </button>
         </div>
       ))
@@ -59,9 +65,11 @@ const commands = [
       opacity var(--ease);
   }
 
-  /* deltached marks the source while it drives the morph handoff (toggling
-     opacity/visibility); killing the transition then keeps the button from
-     fading on its own as it disappears/reappears. */
+  /* 
+  deltached marks the source while it drives the morph handoff (toggling
+  opacity/visibility); killing the transition then keeps the button from
+  fading on its own as it disappears/reappears. 
+  */
   .trigger[data-deltached-morphing] {
     transition: none;
   }
@@ -113,19 +121,43 @@ const commands = [
   }
 
   .copy {
+    position: relative;
+    isolation: isolate;
+
     width: 2.85rem;
     height: 100%;
+
     border: 0;
     border-left: 1px solid var(--border);
+
     background: var(--surface);
     color: var(--muted);
+
     cursor: pointer;
-    display: grid;
-    place-items: center;
+    overflow: hidden;
+
     transition:
       color var(--ease),
       background var(--ease),
       transform var(--ease);
+  }
+
+  .copy-icon {
+    position: absolute;
+    inset: 0;
+
+    display: grid;
+    place-items: center;
+
+    pointer-events: none;
+    will-change: opacity, transform, filter;
+  }
+
+  .copy-icon--check {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.72);
+    filter: blur(6px);
   }
 
   .copy:hover,
@@ -143,23 +175,3 @@ const commands = [
     background: var(--surface-success);
   }
 </style>
-
-<script>
-  // Open/close + morph is handled centrally by setupModal() in scripts/modal.ts.
-  // This script only owns the copy-to-clipboard affordance.
-  document
-    .querySelectorAll<HTMLButtonElement>("[data-copy-command]")
-    .forEach((button) => {
-      button.addEventListener("click", async () => {
-        const command = button.dataset.copyCommand;
-        if (!command) return;
-
-        await navigator.clipboard.writeText(command);
-        button.dataset.copied = "true";
-
-        window.setTimeout(() => {
-          delete button.dataset.copied;
-        }, 900);
-      });
-    });
-</script>

@@ -1,30 +1,47 @@
 ---
 import Base from "../layouts/Base.astro";
+import { sections } from "../examples/registry";
 ---
 
 <Base title="deltached — examples">
   <main class="page">
-    <h1>Examples</h1>
-    <p>Live demos are on the way.</p>
+    <header class="intro">
+      <h1>Examples</h1>
+      <p>
+        Live demos of the deltached morph controller. Every card is a transition
+        source — click one to see the box travel into its panel and hand back on
+        close. Content is pulled from public mock APIs at build time.
+      </p>
+    </header>
+
+    {sections.map((Section) => <Section />)}
   </main>
 
   <style>
     .page {
       display: grid;
-      gap: 0.5rem;
-      justify-items: center;
-      text-align: center;
-      padding: 5rem 2rem;
+      gap: 3.5rem;
+      width: min(100%, 64rem);
+      margin: 0 auto;
+      padding: clamp(2rem, 6vh, 4rem) 1.25rem 6rem;
     }
+
+    .intro {
+      max-width: 44rem;
+    }
+
     h1 {
       margin: 0;
-      font-size: 2rem;
-      font-weight: 600;
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 650;
       letter-spacing: -0.03em;
     }
-    p {
-      margin: 0;
+
+    .intro p {
+      margin: 0.75rem 0 0;
       color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
     }
   </style>
 </Base>

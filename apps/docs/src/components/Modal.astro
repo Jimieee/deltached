@@ -5,10 +5,16 @@ interface Props {
   id: string;
   title?: string;
   description?: string;
+  /**
+   * Accessible name for the dialog when the caller renders its own heading
+   * inside the slot (e.g. a `data-deltached-id` title that morphs in) instead
+   * of passing `title`. Ignored when `title` is set.
+   */
+  ariaLabel?: string;
   class?: string;
 }
 
-const { id, title, description, class: className } = Astro.props;
+const { id, title, description, ariaLabel, class: className } = Astro.props;
 
 const titleId = title ? `${id}-title` : undefined;
 const descriptionId = description ? `${id}-description` : undefined;
@@ -22,9 +28,11 @@ const descriptionId = description ? `${id}-description` : undefined;
     role="dialog"
     aria-modal="true"
     aria-labelledby={titleId}
+    aria-label={titleId ? undefined : ariaLabel}
     aria-describedby={descriptionId}
     tabindex="-1"
     data-modal-panel
+    data-lenis-prevent
   >
     <button
       class="modal__close"

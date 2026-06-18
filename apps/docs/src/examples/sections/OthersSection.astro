@@ -1,0 +1,75 @@
+---
+import ExampleSection from "../../components/examples/ExampleSection.astro";
+import MorphGuardCard from "../../components/examples/MorphGuardCard.astro";
+import Modal from "../../components/Modal.astro";
+import { getPhotos } from "../../data/photos";
+
+// Two photos drive the comparison — same morph, the only difference is the
+// `[data-deltached-morphing]` opt-out on one of the cards.
+const [withGuard, withoutGuard] = await getPhotos();
+const accent = "#0f172a";
+
+const cards = [
+  { photo: withoutGuard, guarded: false, label: "Watch the trigger flicker on close" },
+  { photo: withGuard, guarded: true, label: "Trigger snaps back, no flicker" },
+];
+---
+
+<ExampleSection
+  id="others"
+  title="Others — the morphing guard"
+  description="deltached sets data-deltached-morphing on the trigger while it drives the handoff, so any transition you have on opacity/transform won't fight it. Both cards are identical and both have a hover transition; only the right one opts out with [data-deltached-morphing] { transition: none }. Open and close each to see the difference."
+>
+  {
+    cards.map(({ photo, guarded, label }) => (
+      <MorphGuardCard
+        modalId={`ex-guard-${photo.id}`}
+        image={photo.thumb}
+        label={label}
+        guarded={guarded}
+        accent={accent}
+        mediaId={`guard-media-${photo.id}`}
+      />
+    ))
+  }
+</ExampleSection>
+
+{
+  cards.map(({ photo, guarded }) => (
+    <Modal
+      id={`ex-guard-${photo.id}`}
+      class="ex-guard"
+      title={guarded ? "With guard" : "Without guard"}
+    >
+      <img
+        class="ex-guard__media"
+        src={photo.full}
+        alt={`Photo by ${photo.author}`}
+        data-deltached-id={`guard-media-${photo.id}`}
+      />
+      <p class="ex-guard__text">
+        Photo by {photo.author}. Close this dialog and watch the source card:
+        {guarded
+          ? " it snaps straight back to its resting state."
+          : " it fades back in as its own transition animates the handoff."}
+      </p>
+    </Modal>
+  ))
+}
+
+<style is:global>
+  .ex-guard__media {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    background: var(--surface-active);
+  }
+
+  .ex-guard__text {
+    margin: 1rem 0 0;
+    color: var(--fg-soft);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+</style>

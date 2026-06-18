@@ -1,4 +1,5 @@
 import { createDeltachedTransition } from "deltached";
+import { lockScroll, unlockScroll } from "./smooth-scroll";
 
 /** Selector for everything that can hold keyboard focus inside the panel. */
 const FOCUSABLE =
@@ -28,17 +29,22 @@ export function setupModal(root: HTMLElement): () => void {
     target: panel,
     backdrop,
     timings: { enterDuration: 0.55, leaveDuration: 0.45 },
+    // Opt-in shared-element continuity: any descendant of the trigger AND the
+    // panel that carry the same `data-deltached-id` fly between the two
+    // layouts as their own layer (image, text, surface…) instead of merely
+    // crossfading. No matching ids on a modal → zero cost, identical behavior.
+    persist: {},
     hooks: {
       beforeEnter() {
         root.hidden = false;
-        document.body.style.overflow = "hidden";
+        lockScroll();
       },
       afterEnter() {
         focusFirst();
       },
       afterLeave() {
         root.hidden = true;
-        document.body.style.overflow = "";
+        unlockScroll();
         lastFocused?.focus();
         lastFocused = null;
       },
@@ -105,7 +111,7 @@ export function setupModal(root: HTMLElement): () => void {
     backdrop?.removeEventListener("click", close);
     document.removeEventListener("keydown", onKeydown);
     transition.destroy();
-    document.body.style.overflow = "";
+    unlockScroll();
   };
 }
 

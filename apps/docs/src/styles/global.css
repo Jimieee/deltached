@@ -52,6 +52,7 @@
 
   /* ---- z-index --------------------------------------------------------- */
   --z-nav: 50;
+  --z-scrollbar: 60;
   --z-modal: 100;
 
   /* ---- type ------------------------------------------------------------ */
@@ -81,4 +82,88 @@ code,
 pre,
 kbd {
   font-family: "Geist Mono Variable", ui-monospace, monospace;
+}
+
+/* ----------------------------------------------------------------------- */
+/* Scrolling                                                               */
+/* ----------------------------------------------------------------------- */
+
+/*
+ * Hide the native scrollbar. Lenis drives scrolling and a custom thumb
+ * (scrollbar.ts) shows position, so the bar never reserves width — which is
+ * what made content jump when it appeared/disappeared. Scrolling itself is
+ * untouched (wheel/touch/keyboard still work).
+ */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+
+html::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Lenis base styles (window/body scroll mode). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Opt out of Lenis inside scrollable regions (e.g. the modal panel). */
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Lenis adds this class while stopped; it also locks the page for modals. */
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Custom overlay scrollbar — hidden until scrollbar.ts fades it in. */
+.scrollbar {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: var(--z-scrollbar);
+
+  display: flex;
+  justify-content: center;
+
+  width: 0.85rem;
+  height: 100dvh;
+  padding: 0.4rem 0.25rem;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none; /* only the thumb is interactive */
+}
+
+.scrollbar__thumb {
+  width: 0.35rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--fg) 26%, transparent);
+
+  cursor: grab;
+  pointer-events: auto;
+  transition:
+    background var(--ease),
+    width var(--ease);
+}
+
+.scrollbar__thumb:hover {
+  width: 0.5rem;
+  background: color-mix(in srgb, var(--fg) 42%, transparent);
+}
+
+.scrollbar__thumb:active {
+  cursor: grabbing;
+  background: color-mix(in srgb, var(--fg) 52%, transparent);
 }

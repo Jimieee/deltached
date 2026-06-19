@@ -4,6 +4,12 @@ import MorphGuardCard from "../../components/examples/MorphGuardCard.astro";
 import Modal from "../../components/Modal.astro";
 import { getPhotos } from "../../data/photos";
 
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
 // Two photos drive the comparison — same morph, the only difference is the
 // `[data-deltached-morphing]` opt-out on one of the cards.
 const [withGuard, withoutGuard] = await getPhotos();
@@ -16,7 +22,7 @@ const cards = [
 ---
 
 <ExampleSection
-  id="others"
+  id={id}
   title="Others — the morphing guard"
   description="deltached sets data-deltached-morphing on the trigger while it drives the handoff, so any transition you have on opacity/transform won't fight it. Both cards are identical and both have a hover transition; only the right one opts out with [data-deltached-morphing] { transition: none }. Open and close each to see the difference."
 >

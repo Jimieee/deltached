@@ -2,8 +2,24 @@
 import { isActive, navItems, NPM, REPO } from "../config/nav";
 import Icon from "./Icon.astro";
 import Logo from "./Logo.astro";
+import NavMorph from "./NavMorph.astro";
+
+interface Props {
+  /** In-page section references; with them the center shows the gooey
+   *  active-chip + sections morph, otherwise a plain pill of all pages. */
+  references?: { label: string; href: string }[];
+}
+
+const { references = [] } = Astro.props;
 
 const pathname = Astro.url.pathname;
+
+const foundIndex = navItems.findIndex((item) => isActive(pathname, item.href));
+const activeIndex = foundIndex >= 0 ? foundIndex : 0;
+const activeItem = navItems[activeIndex];
+const pages = navItems.filter((_, index) => index !== activeIndex);
+
+const hasReferences = references.length > 0;
 ---
 
 <nav class="nav" aria-label="Primary">
@@ -11,22 +27,33 @@ const pathname = Astro.url.pathname;
     <Logo size={32} />
   </a>
 
-  <!-- text links: desktop only (mobile uses the bottom nav) -->
-  <ul class="links" role="list">
+  <div class="nav__center">
     {
-      navItems.map((l) => (
-        <li>
-          <a
-            class:list={["link", { active: isActive(pathname, l.href) }]}
-            href={l.href}
-            aria-current={isActive(pathname, l.href) ? "page" : undefined}
-          >
-            {l.label}
-          </a>
-        </li>
-      ))
+      hasReferences ? (
+        <div class="nav__theme">
+          <NavMorph
+            activeItem={activeItem}
+            references={references}
+            pages={pages}
+          />
+        </div>
+      ) : (
+        <ul class="links" role="list">
+          {navItems.map((item) => (
+            <li>
+              <a
+                class:list={["link", { active: isActive(pathname, item.href) }]}
+                href={item.href}
+                aria-current={isActive(pathname, item.href) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
     }
-  </ul>
+  </div>
 
   <div class="external">
     <a
@@ -83,13 +110,37 @@ const pathname = Astro.url.pathname;
     opacity: 0.9;
   }
 
+  .nav__center {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  /* desktop sizing for the shared gooey morph + references pill */
+  .nav__theme {
+    display: contents;
+
+    --morph-height: var(--nav-size);
+    --morph-gap: 0.9rem;
+
+    --refs-height: var(--nav-size);
+    --refs-arrow: 2.4rem;
+    --refs-track-max: min(38vw, 24rem);
+    --refs-font: 1.05rem;
+    --refs-fade: 1.2rem;
+    --refs-pad: 0.85rem;
+    --refs-link-pad: 0.95rem;
+    --refs-gap: 0.35rem;
+  }
+
+  /* ---- plain nav (pages without in-page references) -------------------- */
   .links {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
     height: var(--nav-size);
     margin: 0;
-    padding: 0 0.75rem;
+    padding: 0 0.65rem;
+    gap: 0.1rem;
     list-style: none;
     border-radius: var(--radius-pill);
     background: var(--ink);
@@ -103,18 +154,16 @@ const pathname = Astro.url.pathname;
     text-decoration: none;
     font-size: 1.05rem;
     font-weight: 500;
-    opacity: 0.75;
-    transition:
-      opacity var(--ease),
-      background var(--ease);
+    opacity: 0.65;
+    transition: opacity var(--ease);
   }
   .link:hover,
   .link:focus-visible {
     opacity: 1;
   }
+  /* current page: brighter only — same shape as the rest, no box. */
   .link.active {
     opacity: 1;
-    background: var(--hover-tint);
   }
 
   .external {
@@ -124,14 +173,14 @@ const pathname = Astro.url.pathname;
   }
 
   /* mobile: header role only — logo left, externals right; pages move to the
-     bottom nav, so the text links are hidden. */
+     bottom nav, so the center area is hidden. */
   @media (max-width: 768px) {
     .nav {
       justify-content: space-between;
       gap: 0.5rem;
       padding: 1rem;
     }
-    .links {
+    .nav__center {
       display: none;
     }
     .circle {

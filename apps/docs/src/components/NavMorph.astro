@@ -1,0 +1,158 @@
+---
+/**
+ * Gooey nav for a page WITH in-page references. Rendered fresh per page (no
+ * persistence), so it always starts from a clean state — nav.ts plays the
+ * entrance (the chip splits out from inside the navbar with a goo neck) and
+ * wires the hover/tap toggle (references ⇆ pages). The goo filter is applied
+ * only while morphing; at rest these are plain crisp pills.
+ *
+ * Two layers keep text crisp under the SVG goo (GooFilter.astro):
+ *  - `.morph__goo`  — blob backgrounds only; `filter: url(#gooey)` via `.is-morphing`.
+ *  - `.morph__content` — the real, transparent-background pills + crisp text.
+ */
+import NavReferences from "./NavReferences.astro";
+
+interface Props {
+  activeItem: { label: string; href: string };
+  references: { label: string; href: string }[];
+  /** The other (non-active) pages, shown when expanded. */
+  pages: { label: string; href: string }[];
+  /** Pointer model for the toggle: hover (desktop) or touch (mobile). */
+  trigger?: "hover" | "touch";
+}
+
+const { activeItem, references, pages, trigger = "hover" } = Astro.props;
+---
+
+<div class="morph" data-navmorph data-trigger={trigger} data-nav-expanded="false">
+  <div class="morph__goo" aria-hidden="true">
+    <span class="morph__blob" data-blob="chip"></span>
+    <span class="morph__blob" data-blob="panel"></span>
+  </div>
+
+  <div class="morph__content">
+    <a class="morph__item" href={activeItem.href} aria-current="page" data-nav-chip>
+      {activeItem.label}
+    </a>
+
+    <div class="morph__panel" data-nav-panel>
+      <div class="morph__layer" data-panel-layer="refs">
+        <NavReferences
+          references={references}
+          label={`${activeItem.label} sections`}
+        />
+      </div>
+
+      <ul class="morph__layer morph__pages" data-panel-layer="pages" role="list">
+        {
+          pages.map((page) => (
+            <li>
+              <a class="morph__item" href={page.href}>
+                {page.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .morph {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  /* ---- goo (blob) layer — filter only while morphing ------------------ */
+  .morph__goo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    filter: none;
+  }
+  .morph.is-morphing .morph__goo {
+    filter: url(#gooey);
+  }
+
+  .morph__blob {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: var(--morph-height, var(--refs-height, 2.6rem));
+    border-radius: var(--radius-pill);
+    background: var(--ink);
+    will-change: transform, width;
+  }
+
+  /* ---- content layer (crisp, on top) ---------------------------------- */
+  .morph__content {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--morph-gap, 0.4rem);
+    min-width: 0;
+  }
+
+  /* The active chip and the page links share ONE item style — the active
+     page's only distinction is becoming its own pill, never a box or weight. */
+  .morph__item {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    height: calc(var(--morph-height, var(--refs-height, 2.6rem)) - 0.7rem);
+    padding: 0 var(--refs-link-pad, 0.7rem);
+
+    border-radius: var(--radius-pill);
+    color: var(--ink-fg);
+    font-size: var(--refs-font, 0.8rem);
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* the chip carries the relabel blur GSAP animates */
+  .morph__content > .morph__item {
+    filter: blur(var(--chip-blur, 0px));
+  }
+
+  .morph__panel {
+    position: relative;
+    flex: 0 0 auto;
+    height: var(--morph-height, var(--refs-height, 2.6rem));
+    overflow: hidden;
+  }
+
+  /* Both contents stack; only one is opaque at a time. Out of flow so they
+     don't fight the panel's animated width. */
+  .morph__layer {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+    /* the references pill drops its own background — the blob paints it */
+    --refs-bg: transparent;
+    filter: blur(var(--layer-blur, 0px));
+    will-change: filter, opacity;
+  }
+
+  .morph__pages {
+    gap: 0.1rem;
+    margin: 0;
+    padding: 0 var(--refs-pad, 0.5rem);
+    list-style: none;
+  }
+
+  .morph__pages .morph__item {
+    opacity: 0.7;
+    transition: opacity var(--ease);
+  }
+  .morph__pages .morph__item:hover,
+  .morph__pages .morph__item:focus-visible {
+    opacity: 1;
+  }
+</style>

@@ -1,0 +1,173 @@
+---
+/**
+ * The in-page references group shared by both navs: a width-capped, edge-masked
+ * track of section links flanked by prev/next chevrons. Visuals are driven by
+ * CSS custom properties (with fallbacks) so each nav themes it by setting the
+ * `--refs-*` vars on an ancestor — no per-nav copy of this markup.
+ *
+ * The arrows carry data hooks (`data-refs-prev`/`-next`/`-track`) but no
+ * behavior yet; this is the maquette the later GSAP/scroll wiring plugs into.
+ */
+import Icon from "./Icon.astro";
+
+interface Props {
+  references: { label: string; href: string }[];
+  label: string;
+}
+
+const { references, label } = Astro.props;
+---
+
+<div class="refs" role="group" aria-label={label} data-refs>
+  <button
+    class="refs__arrow"
+    type="button"
+    data-refs-prev
+    aria-label="Previous sections"
+  >
+    <Icon name="chevron-left" size={16} />
+  </button>
+
+  <ul class="refs__track" role="list" data-refs-track data-lenis-prevent>
+    {
+      references.map((ref) => (
+        <li>
+          <a class="refs__link" href={ref.href}>
+            {ref.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <button
+    class="refs__arrow"
+    type="button"
+    data-refs-next
+    aria-label="More sections"
+  >
+    <Icon name="chevron-right" size={16} />
+  </button>
+</div>
+
+<style>
+  .refs {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    min-width: 0;
+    height: var(--refs-height, 2.6rem);
+    padding-inline: var(--refs-pad, 0.5rem);
+
+    border-radius: var(--radius-pill);
+    /* `--refs-bg` lets the gooey nav drop the pill background (the blob layer
+       paints it instead); standalone it stays the ink pill. */
+    background: var(--refs-bg, var(--ink));
+    color: var(--ink-fg);
+  }
+  /* Arrows sit at the edges and supply their own inset, so tighten the pill
+     padding when they're shown. */
+  .refs[data-overflow="true"] {
+    padding-inline: 0.2rem;
+  }
+
+  /*
+   * Arrows are hidden by default and only revealed when the track actually
+   * overflows its cap (set by nav.ts via `data-overflow`). With few, short
+   * references that fit, there is nothing to page through, so no chevrons.
+   */
+  .refs__arrow {
+    flex: 0 0 auto;
+    display: none;
+    place-items: center;
+    width: var(--refs-arrow, 1.7rem);
+    height: var(--refs-arrow, 1.7rem);
+
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: inherit;
+
+    cursor: pointer;
+    opacity: 0.7;
+    transition:
+      opacity var(--ease),
+      background var(--ease);
+  }
+  .refs[data-overflow="true"] .refs__arrow {
+    display: inline-grid;
+  }
+
+  .refs__arrow:hover,
+  .refs__arrow:focus-visible {
+    opacity: 1;
+    background: var(--hover-tint);
+  }
+
+  /* Width-capped, horizontally scrollable track. Native bar hidden (nested
+     scroller). The edge-fade mask is applied only when the track actually
+     overflows (below) — with few labels that fit there is nothing to fade. */
+  .refs__track {
+    display: flex;
+    align-items: center;
+    gap: var(--refs-gap, 0.15rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    max-width: var(--refs-track-max, min(62vw, 15rem));
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .refs__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /*
+   * Only once the track overflows its cap do the labels at the edges fade into
+   * transparency (so the overflowing one dissolves instead of being cut hard),
+   * in sync with the chevrons appearing.
+   */
+  .refs[data-overflow="true"] .refs__track {
+    --refs-fade-edge: var(--refs-fade, 0.9rem);
+
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--refs-fade-edge),
+      #000 calc(100% - var(--refs-fade-edge)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--refs-fade-edge),
+      #000 calc(100% - var(--refs-fade-edge)),
+      transparent 100%
+    );
+  }
+
+  /* Global: these links are rebuilt via innerHTML on navigation, which strips
+     Astro's scoped-style attribute — so their styles must not be scoped. */
+  :global(.refs__link) {
+    display: inline-flex;
+    align-items: center;
+    height: calc(var(--refs-height, 2.6rem) - 0.7rem);
+    padding: 0 var(--refs-link-pad, 0.7rem);
+
+    border-radius: var(--radius-pill);
+    color: var(--ink-fg);
+    text-decoration: none;
+    font-size: var(--refs-font, 0.8rem);
+    font-weight: 500;
+    white-space: nowrap;
+
+    opacity: 0.7;
+    transition: opacity var(--ease);
+  }
+  :global(.refs__link:hover),
+  :global(.refs__link:focus-visible) {
+    opacity: 1;
+  }
+</style>

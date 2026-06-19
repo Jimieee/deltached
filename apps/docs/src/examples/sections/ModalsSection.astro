@@ -4,6 +4,12 @@ import ExampleSection from "../../components/examples/ExampleSection.astro";
 import Modal from "../../components/Modal.astro";
 import { getProducts } from "../../data/products";
 
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
 const products = await getProducts();
 const accent = "#1f6feb";
 
@@ -14,7 +20,7 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
 ---
 
 <ExampleSection
-  id="modals"
+  id={id}
   title="Modals"
   description="Surface morph with persisted children. The card box morphs into the dialog while the thumbnail and the title — tagged with the same data-deltached-id on both sides — fly into their new place instead of crossfading. Backdrop and the rest of the content fade in sync."
 >

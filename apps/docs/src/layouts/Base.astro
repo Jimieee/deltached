@@ -1,18 +1,23 @@
 ---
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 import BottomNav from "../components/BottomNav.astro";
+import GooFilter from "../components/GooFilter.astro";
 import Navbar from "../components/Navbar.astro";
 
 interface Props {
   title?: string;
   description?: string;
+  /** In-page section references for the navbar (pages with anchors). */
+  references?: { label: string; href: string }[];
 }
 
 const {
   title = "deltached",
   description = "Deltached transitions for the web.",
+  references = [],
 } = Astro.props;
 ---
 
@@ -22,10 +27,12 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body>
-    <Navbar />
-    <BottomNav />
+    <GooFilter />
+    <Navbar references={references} />
+    <BottomNav references={references} />
     <slot />
 
     <div class="scrollbar" data-scrollbar aria-hidden="true">

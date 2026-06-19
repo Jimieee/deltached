@@ -1,9 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
-import { sections } from "../examples/registry";
+import { references, sections } from "../examples/registry";
 ---
 
-<Base title="deltached — examples">
+<Base title="deltached — examples" references={references}>
   <main class="page">
     <header class="intro">
       <h1>Examples</h1>
@@ -14,7 +14,7 @@ import { sections } from "../examples/registry";
       </p>
     </header>
 
-    {sections.map((Section) => <Section />)}
+    {sections.map((entry) => <entry.Component id={entry.id} />)}
   </main>
 
   <style>

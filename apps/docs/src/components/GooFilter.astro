@@ -1,0 +1,38 @@
+---
+/**
+ * Global gooey/metaball filter. Included once (in Base). It must wrap ONLY the
+ * nav blob layer — never text — because the blur mangles everything inside:
+ *
+ *  - feGaussianBlur fuses the edges of overlapping shapes into one mass.
+ *  - feColorMatrix re-sharpens the alpha (`… 0 0 0 N -M`) so the blurred edges
+ *    snap back to crisp, but stay merged where they overlapped → the liquid
+ *    "goo" that stretches as two blobs separate or come together.
+ *
+ * `stdDeviation` tunes blob softness; the alpha row N/-M tunes stickiness.
+ */
+---
+
+<svg class="goo-filter" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="gooey">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+      <feColorMatrix
+        in="blur"
+        mode="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 19 -9"
+      />
+    </filter>
+  </defs>
+</svg>
+
+<style>
+  .goo-filter {
+    position: absolute;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+</style>

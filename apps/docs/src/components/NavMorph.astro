@@ -1,10 +1,10 @@
 ---
 /**
  * Gooey nav for a page WITH in-page references. Rendered fresh per page (no
- * persistence), so it always starts from a clean state — nav.ts plays the
- * entrance (the chip splits out from inside the navbar with a goo neck) and
- * wires the hover/tap toggle (references ⇆ pages). The goo filter is applied
- * only while morphing; at rest these are plain crisp pills.
+ * persistence), so it always starts from a clean, server-rendered resting
+ * state. nav.ts wires the hover/tap toggle (references ⇆ pages), while route
+ * changes use a separate cross-page morph overlay. At rest these are plain
+ * crisp pills.
  *
  * Two layers keep text crisp under the SVG goo (GooFilter.astro):
  *  - `.morph__goo`  — blob backgrounds only; `filter: url(#gooey)` via `.is-morphing`.
@@ -154,5 +154,32 @@ const { activeItem, references, pages, trigger = "hover" } = Astro.props;
   .morph__pages .morph__item:hover,
   .morph__pages .morph__item:focus-visible {
     opacity: 1;
+  }
+
+  /* Server-render the resting references state. JS freezes this intrinsic
+     width before switching both layers to the animated absolute stack. */
+  .morph:not([data-nav-ready="true"]) .morph__content > .morph__item,
+  .morph:not([data-nav-ready="true"]) .morph__panel {
+    background: var(--ink);
+  }
+
+  .morph:not([data-nav-ready="true"]) .morph__content > .morph__item {
+    height: var(--morph-height, var(--refs-height, 2.6rem));
+  }
+
+  .morph:not([data-nav-ready="true"]) .morph__panel {
+    border-radius: var(--radius-pill);
+  }
+
+  .morph:not([data-nav-ready="true"])
+    .morph__layer[data-panel-layer="refs"] {
+    position: relative;
+    inset: auto;
+  }
+
+  .morph:not([data-nav-ready="true"])
+    .morph__layer[data-panel-layer="pages"] {
+    opacity: 0;
+    visibility: hidden;
   }
 </style>

@@ -4,7 +4,7 @@ import {
   initFontWeightProximity,
 } from "./font-weight-proximity";
 import { initModals } from "./modal";
-import { initNav } from "./nav";
+import { initNav, initNavRouteTransitions } from "./nav";
 import { initScrollbar } from "./scrollbar";
 import { initSmoothScroll } from "./smooth-scroll";
 
@@ -13,6 +13,8 @@ let teardownCopyButtons: (() => void) | null = null;
 let teardownSmoothScroll: (() => void) | null = null;
 let teardownScrollbar: (() => void) | null = null;
 let teardownNav: (() => void) | null = null;
+
+initNavRouteTransitions();
 
 // Per-page wiring. With the ClientRouter this runs on the initial load and
 // after every navigation (astro:page-load), and is torn down before each swap.

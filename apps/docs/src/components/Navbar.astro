@@ -22,8 +22,17 @@ const pages = navItems.filter((_, index) => index !== activeIndex);
 const hasReferences = references.length > 0;
 ---
 
-<nav class="nav" aria-label="Primary">
-  <a class="circle" href="/" aria-label="deltached — home">
+<nav
+  class="nav"
+  aria-label="Primary"
+  data-route-nav="desktop"
+  data-nav-has-references={String(hasReferences)}
+>
+  <a
+    class="circle"
+    href="/"
+    aria-label="deltached — home"
+  >
     <Logo size={32} />
   </a>
 
@@ -38,7 +47,7 @@ const hasReferences = references.length > 0;
           />
         </div>
       ) : (
-        <ul class="links" role="list">
+        <ul class="links" role="list" data-nav-plain>
           {navItems.map((item) => (
             <li>
               <a

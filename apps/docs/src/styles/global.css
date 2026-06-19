@@ -167,3 +167,200 @@ html.lenis body {
   cursor: grabbing;
   background: color-mix(in srgb, var(--fg) 52%, transparent);
 }
+
+/* ----------------------------------------------------------------------- */
+/* Route nav morph                                                         */
+/* ----------------------------------------------------------------------- */
+
+html[data-route-nav-transition]::view-transition-old(root),
+html[data-route-nav-transition]::view-transition-new(root) {
+  animation-duration: 1ms !important;
+}
+
+[data-route-nav-hidden] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.route-nav-morph {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+  color: var(--ink-fg);
+}
+
+.route-nav-morph__goo,
+.route-nav-morph__content {
+  position: absolute;
+  inset: 0;
+}
+
+.route-nav-morph__goo {
+  filter: url(#gooey);
+}
+
+.route-nav-morph__blob,
+.route-nav-morph__chip,
+.route-nav-morph__panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--radius-pill);
+}
+
+.route-nav-morph__blob {
+  background: var(--ink);
+  will-change: transform, width, height;
+}
+
+.route-nav-morph__chip,
+.route-nav-morph__panel {
+  overflow: hidden;
+  color: var(--ink-fg);
+  will-change: transform, width, height, opacity;
+}
+
+.route-nav-morph__chip {
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+}
+
+.route-nav-morph__chip > span {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 var(--refs-link-pad, 0.7rem);
+  font-size: var(--refs-font, 0.8rem);
+  font-weight: 500;
+  filter: blur(var(--route-chip-blur, 0px));
+  will-change: filter, opacity;
+}
+
+.route-nav-morph__layer {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  min-width: 100%;
+  --refs-bg: transparent;
+  filter: blur(var(--route-layer-blur, 0px));
+  will-change: filter, opacity;
+}
+
+.route-nav-morph__layer > .morph__layer {
+  position: static !important;
+  inset: auto !important;
+  width: max-content !important;
+  height: 100%;
+  filter: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.route-nav-morph__layer .links,
+.route-nav-morph__layer .refs {
+  background: transparent !important;
+}
+
+.route-nav-morph__layer .links {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--refs-gap, 0.1rem);
+  margin: 0;
+  padding: 0 var(--refs-pad, 0.65rem);
+  list-style: none;
+  height: 100%;
+}
+
+.route-nav-morph__layer .links > li {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.route-nav-morph__layer .link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center;
+  height: calc(var(--morph-height, var(--refs-height, 2.6rem)) - 0.7rem);
+  padding: 0 var(--refs-link-pad, 0.7rem) !important;
+  border-radius: var(--radius-pill);
+  color: var(--ink-fg);
+  font-size: var(--refs-font, 0.8rem);
+  font-weight: 500;
+  line-height: 1;
+  opacity: 0.65;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.route-nav-morph__layer .link.active {
+  opacity: 1;
+}
+
+.route-nav-morph__layer .morph__pages .morph__item {
+  opacity: 0.7;
+}
+
+.route-nav-morph[data-route-kind="desktop"]
+  [data-route-panel-mode="plain"]
+  .links {
+  gap: 0.1rem;
+  padding: 0 0.65rem;
+}
+
+.route-nav-morph[data-route-kind="desktop"]
+  [data-route-panel-mode="plain"]
+  .link {
+  display: block !important;
+  height: auto;
+  padding: 0.5rem 0.95rem !important;
+  font-size: 1.05rem;
+  line-height: normal;
+}
+
+.route-nav-morph[data-route-kind="mobile"]
+  [data-route-panel-mode="plain"]
+  .links {
+  gap: 0.05rem;
+  padding: 0 0.4rem;
+}
+
+.route-nav-morph[data-route-kind="mobile"]
+  [data-route-panel-mode="plain"]
+  .link {
+  height: 1.9rem;
+  padding: 0 0.6rem !important;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.route-nav-morph__layer .morph__pages {
+  display: flex !important;
+  align-items: center;
+  gap: 0.1rem;
+  height: 100%;
+  margin: 0;
+  padding: 0 var(--refs-pad, 0.5rem);
+  list-style: none;
+}
+
+.route-nav-morph__layer .morph__item {
+  display: inline-flex;
+  align-items: center;
+  height: calc(var(--morph-height, var(--refs-height, 2.6rem)) - 0.7rem);
+  padding: 0 var(--refs-link-pad, 0.7rem);
+  border-radius: var(--radius-pill);
+  color: var(--ink-fg);
+  font-size: var(--refs-font, 0.8rem);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}

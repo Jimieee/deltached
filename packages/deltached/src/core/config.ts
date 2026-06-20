@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 import { CustomEase } from "gsap/CustomEase";
 import { isBrowser } from "./dom";
+import { clamp01 } from "./math";
 import type { DeltachedTimings } from "./types";
 
 export const ENTER_EASE = "deltached.enter";
@@ -41,8 +42,6 @@ export const DEFAULT_TIMINGS: DeltachedTimings = {
   contentBlur: 12,
   reducedMotionDuration: 0.15,
 };
-
-const clamp01 = gsap.utils.clamp(0, 1);
 
 export function resolveTimings(
   overrides?: Partial<DeltachedTimings>,

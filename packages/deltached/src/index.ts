@@ -10,6 +10,10 @@ export {
   LEAVE_EASE,
   registerEase,
 } from "./core/config";
+export {
+  DEFAULT_PLACEMENT,
+  DEFAULT_PLACEMENT_MARGIN,
+} from "./core/placement";
 export { MORPHING_ATTRIBUTE, prefersReducedMotion } from "./core/dom";
 export {
   animatePersistPair,
@@ -42,6 +46,7 @@ export type {
 export type {
   ElementGeometry,
   EnterOptions,
+  Placement,
   Rect,
   DeltachedConfig,
   DeltachedHooks,

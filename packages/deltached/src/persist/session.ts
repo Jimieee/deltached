@@ -12,12 +12,7 @@
 import { gsap } from "gsap";
 import { builtinPersistAdapters, defaultClassify } from "./adapters";
 import { persistFrameVars, positionToTime } from "./flight";
-import {
-  clamp01,
-  insetFrame,
-  insetFrameLerp,
-  lerpRadius,
-} from "./geometry";
+import { insetFrame, insetFrameLerp, lerpRadius } from "./geometry";
 import {
   capturePersistSnapshots,
   pairPersistSnapshots,
@@ -35,6 +30,8 @@ import {
   type PersistPairLayers,
   type ResolvedPersistConfig,
 } from "./types";
+import { viewportSize } from "../core/dom";
+import { clamp01 } from "../core/math";
 import type { ElementGeometry, DeltachedTimings } from "../core/types";
 
 const DEFAULT_OVERLAY_Z = 9999;
@@ -176,8 +173,30 @@ export class PersistSession {
       }
     }
     this.pairs = pairPersistSnapshots(from, to);
-    this.viewport = { width: window.innerWidth, height: window.innerHeight };
+    this.viewport = viewportSize();
     this.scrollAtCapture = { x: window.scrollX, y: window.scrollY };
+  }
+
+  /**
+   * Rebases every "to" snapshot by `(dx, dy)`. Used for origin placement: the
+   * target's persisted children were captured at its natural in-flow layout,
+   * but the controller settles the surface at a translated resting frame, so
+   * the SAME rigid translation must move the children's destinations or the
+   * layers would land offset from the surface they ride. A pure translation —
+   * sizes and styles are untouched, only the destination position shifts.
+   * Call once, right after `capture()` and before `mount()`; a zero delta or
+   * an empty session is a no-op.
+   */
+  public translateTo(dx: number, dy: number): void {
+    if ((dx === 0 && dy === 0) || !this.pairs.length) return;
+    for (const pair of this.pairs) {
+      if (!pair.to) continue;
+      pair.to.rect = {
+        ...pair.to.rect,
+        x: pair.to.rect.x + dx,
+        y: pair.to.rect.y + dy,
+      };
+    }
   }
 
   /**

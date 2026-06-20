@@ -1,4 +1,4 @@
-import { createDeltachedTransition } from "deltached";
+import { createDeltachedTransition, type Placement } from "deltached";
 import { lockScroll, unlockScroll } from "./smooth-scroll";
 
 /** Selector for everything that can hold keyboard focus inside the panel. */
@@ -56,18 +56,26 @@ export function setupModal(root: HTMLElement): () => void {
     (first ?? panel!).focus();
   }
 
-  function open(from: HTMLElement): void {
+  function open(from: HTMLElement, placement?: Placement): void {
     if (transition.isOpen || transition.phase === "entering") return;
     lastFocused = document.activeElement as HTMLElement | null;
-    void transition.enter({ from });
+    void transition.enter({ from, placement });
   }
 
   function close(): void {
     void transition.leave();
   }
 
-  const onTriggerClick = (event: Event) =>
-    open(event.currentTarget as HTMLElement);
+  // A trigger may declare `data-modal-placement` (e.g. "origin",
+  // "origin-bottom") to open the panel anchored to itself instead of centered;
+  // "center" or an absent attribute falls back to the transition's default.
+  const onTriggerClick = (event: Event) => {
+    const trigger = event.currentTarget as HTMLElement;
+    const attr = trigger.dataset.modalPlacement;
+    const placement =
+      attr && attr !== "center" ? (attr as Placement) : undefined;
+    open(trigger, placement);
+  };
   triggers.forEach((t) => t.addEventListener("click", onTriggerClick));
 
   const closers = Array.from(

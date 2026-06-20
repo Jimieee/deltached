@@ -17,26 +17,50 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
 });
+
+// Showcase every origin-family placement: each card opens with a different
+// growth direction so the gallery demonstrates the whole set at once.
+const placements = [
+  "origin",
+  "origin-bottom",
+  "origin-top",
+  "origin-right",
+  "origin-left",
+  "origin-auto",
+] as const;
+
+const placementCta: Record<(typeof placements)[number], string> = {
+  origin: "Grows from center",
+  "origin-bottom": "Grows down ↓",
+  "origin-top": "Grows up ↑",
+  "origin-right": "Grows right →",
+  "origin-left": "Grows left ←",
+  "origin-auto": "Auto ↕ (flips up/down)",
+};
 ---
 
 <ExampleSection
   id={id}
   title="Modals"
-  description="Surface morph with persisted children. The card box morphs into the dialog while the thumbnail and the title — tagged with the same data-deltached-id on both sides — fly into their new place instead of crossfading. Backdrop and the rest of the content fade in sync."
+  description="Surface morph with persisted children, opened with the origin placement family: the dialog grows out of the card you click — from its center, toward a side (down / up / right / left), or auto (a vertical dropdown that flips up/down toward the room, live as you resize) — and stays anchored there, clamped to the viewport and re-clamped on resize. The thumbnail and the title, tagged with the same data-deltached-id on both sides, fly into their new place instead of crossfading. Each card below is labelled with the variant it uses."
 >
   {
-    products.map((product) => (
-      <ExampleCard
-        modalId={`ex-modal-${product.id}`}
-        image={product.image}
-        eyebrow={product.category}
-        title={product.title}
-        cta="View details"
-        accent={accent}
-        mediaId={`product-media-${product.id}`}
-        titleId={`product-title-${product.id}`}
-      />
-    ))
+    products.map((product, i) => {
+      const placement = placements[i % placements.length];
+      return (
+        <ExampleCard
+          modalId={`ex-modal-${product.id}`}
+          image={product.image}
+          eyebrow={product.category}
+          title={product.title}
+          cta={placementCta[placement]}
+          accent={accent}
+          mediaId={`product-media-${product.id}`}
+          titleId={`product-title-${product.id}`}
+          placement={placement}
+        />
+      );
+    })
   }
 </ExampleSection>
 

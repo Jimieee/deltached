@@ -28,6 +28,20 @@ interface Props {
    */
   mediaId?: string;
   titleId?: string;
+  /**
+   * Resting placement for the morph (forwarded to deltached via
+   * `data-modal-placement`). The origin family (`"origin"`, `"origin-top"`,
+   * `"origin-bottom"`, `"origin-left"`, `"origin-right"`, `"origin-auto"`)
+   * opens the panel anchored to this card; omit for the default centered behavior.
+   */
+  placement?:
+    | "center"
+    | "origin"
+    | "origin-top"
+    | "origin-bottom"
+    | "origin-left"
+    | "origin-right"
+    | "origin-auto";
 }
 
 const {
@@ -40,6 +54,7 @@ const {
   accent,
   mediaId,
   titleId,
+  placement,
 } = Astro.props;
 
 const style = accent ? `--card-accent: ${accent}` : undefined;
@@ -49,6 +64,7 @@ const style = accent ? `--card-accent: ${accent}` : undefined;
   class:list={["card", `card--${variant}`]}
   type="button"
   data-modal-open={modalId}
+  data-modal-placement={placement && placement !== "center" ? placement : undefined}
   style={style}
   aria-label={`Open ${title}`}
 >

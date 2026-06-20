@@ -5,18 +5,13 @@
  * progress so both stay exact across the flight and any interrupt.
  */
 
+import { lerp } from "../core/math";
 import type { ElementGeometry } from "../core/types";
 
 interface Viewport {
   width: number;
   height: number;
 }
-
-export const clamp01 = (value: number): number =>
-  Math.min(Math.max(value, 0), 1);
-
-export const lerp = (a: number, b: number, p: number): number =>
-  a + (b - a) * p;
 
 /** Parses a canonical `h1 h2 h3 h4 / v1 v2 v3 v4` radius into 8 px numbers. */
 export function parseRadius(canonical: string): number[] {

@@ -3,6 +3,7 @@
  */
 
 import { gsap } from "gsap";
+import { clamp } from "../../core/math";
 import { animatePersistPair } from "../flight";
 import { readSnapshotCore } from "../measure";
 import type { PersistAdapter, PersistVisualLayer } from "../types";
@@ -73,8 +74,9 @@ export const textAdapter: PersistAdapter = {
       const fromFont = parseFloat(pair.from.computed.fontSize ?? "") || 0;
       const toFont = parseFloat(pair.to.computed.fontSize ?? "") || 0;
       const ratio = fromFont > 0 && toFont > 0 ? toFont / fromFont : 1;
-      const clamped = Math.min(
-        Math.max(ratio, 1 / MAX_VISIBLE_TEXT_SCALE),
+      const clamped = clamp(
+        ratio,
+        1 / MAX_VISIBLE_TEXT_SCALE,
         MAX_VISIBLE_TEXT_SCALE,
       );
       // Only worth a warn when the clamp truncates meaningfully — the

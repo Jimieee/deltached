@@ -58,8 +58,15 @@ export function getLenis(): Lenis | null {
   return lenis;
 }
 
+// Ref-counted so nested overlays (e.g. a custom select opened from inside a
+// form modal) don't unlock the page when the INNER one closes — the lock lifts
+// only once every overlay that asked for it has released.
+let lockDepth = 0;
+
 /** Freeze page scroll (modal open). Falls back to body overflow without Lenis. */
 export function lockScroll(): void {
+  lockDepth += 1;
+  if (lockDepth > 1) return;
   if (lenis) lenis.stop();
   else if (typeof document !== "undefined") {
     document.body.style.overflow = "hidden";
@@ -67,6 +74,9 @@ export function lockScroll(): void {
 }
 
 export function unlockScroll(): void {
+  if (lockDepth === 0) return;
+  lockDepth -= 1;
+  if (lockDepth > 0) return;
   if (lenis) lenis.start();
   else if (typeof document !== "undefined") {
     document.body.style.overflow = "";

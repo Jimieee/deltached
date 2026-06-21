@@ -1,0 +1,438 @@
+---
+/**
+ * Forms & custom controls.
+ *
+ * Two entry buttons morph into forms. The first is the showcase: a real form
+ * whose Role and Team-size fields are `<div>`-based custom selects whose option
+ * lists are themselves deltached morphs (CustomSelect) — a popover growing out
+ * of a field that lives inside a panel that grew out of a button. The host form
+ * uses `center` placement precisely so the nested origin popovers stay
+ * viewport-anchored. Submitting flips the panel to a success state.
+ */
+import CustomSelect from "../../components/examples/CustomSelect.astro";
+import ExampleSection from "../../components/examples/ExampleSection.astro";
+import Icon from "../../components/Icon.astro";
+import Modal from "../../components/Modal.astro";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
+const roleOptions = [
+  { value: "engineer", label: "Engineer", hint: "Frontend / fullstack" },
+  { value: "designer", label: "Designer", hint: "Product / motion" },
+  { value: "pm", label: "Product manager" },
+  { value: "founder", label: "Founder", hint: "Solo or small team" },
+  { value: "other", label: "Something else" },
+];
+
+const teamOptions = [
+  { value: "solo", label: "Just me" },
+  { value: "2-10", label: "2–10 people" },
+  { value: "11-50", label: "11–50 people" },
+  { value: "51-200", label: "51–200 people" },
+  { value: "200+", label: "200+ people" },
+];
+
+const ratingOptions = [
+  { value: "love", label: "Love it", hint: "Shipping with it already" },
+  { value: "promising", label: "Promising", hint: "Watching closely" },
+  { value: "curious", label: "Just curious" },
+  { value: "confused", label: "Confused", hint: "Tell us why below" },
+];
+---
+
+<ExampleSection
+  id={id}
+  title="Forms & custom controls"
+  description="A button morphs into a form — and a field inside it morphs open its own custom select, a popover built from divs, not the native control. Pick an option, submit, and the panel hands off to a success state."
+>
+  <div class="entries">
+    <button
+      class="row"
+      style="border-radius: 10px 10px 0 0;"
+      type="button"
+      data-modal-open="ex-form-access"
+      aria-label="Request early access"
+    >
+      <span class="row__text">
+        <span class="row__title">Request early access</span>
+        <span class="row__sub">Join the waitlist in a few fields.</span>
+      </span>
+      <Icon name="chevron-right" size={17} class="row__chevron" />
+    </button>
+
+    <div class="separator"></div>
+
+    <button
+      class="row"
+      style="border-radius: 0 0 10px 10px;"
+      type="button"
+      data-modal-open="ex-form-feedback"
+      aria-label="Send feedback"
+    >
+      <span class="row__text">
+        <span class="row__title">Send feedback</span>
+        <span class="row__sub">Tell us how it's going.</span>
+      </span>
+      <Icon name="chevron-right" size={17} class="row__chevron" />
+    </button>
+  </div>
+</ExampleSection>
+
+{/* ---- Request early access ------------------------------------------- */}
+<Modal id="ex-form-access" class="ex-form" title="Request early access">
+  <form class="demo-form" data-demo-form novalidate>
+    <div class="demo-form__fields">
+      <p class="demo-form__lead">A few details and you're on the list.</p>
+
+      <div class="field">
+        <label class="field__label" for="access-name">Full name</label>
+        <input
+          class="field__input"
+          id="access-name"
+          name="name"
+          type="text"
+          placeholder="Ada Lovelace"
+          autocomplete="name"
+          required
+        />
+      </div>
+
+      <div class="demo-form__row">
+        <CustomSelect
+          id="access-role"
+          name="role"
+          label="Your role"
+          placeholder="Choose a role"
+          options={roleOptions}
+          placement="origin"
+        />
+        <CustomSelect
+          id="access-team"
+          name="team"
+          label="Team size"
+          placeholder="How many of you?"
+          options={teamOptions}
+          placement="origin"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="access-note"
+          >What are you building?</label
+        >
+        <textarea
+          class="field__input field__input--area"
+          id="access-note"
+          name="note"
+          rows="3"
+          placeholder="A morphing photo gallery, a command palette…"></textarea>
+      </div>
+
+      <button class="demo-form__submit" type="submit">
+        <Icon name="send" size={16} />
+        Request access
+      </button>
+    </div>
+
+    <div class="demo-form__success" role="status">
+      <span class="demo-form__check"
+        ><Icon name="circle-check" size={40} /></span
+      >
+      <h3>You're on the list</h3>
+      <p>We'll email you the moment your spot opens up.</p>
+      <button class="demo-form__done" type="button" data-modal-close
+        >Done</button
+      >
+    </div>
+  </form>
+</Modal>
+
+{/* ---- Send feedback -------------------------------------------------- */}
+<Modal id="ex-form-feedback" class="ex-form" title="Send feedback">
+  <form class="demo-form" data-demo-form novalidate>
+    <div class="demo-form__fields">
+      <CustomSelect
+        id="feedback-rating"
+        name="rating"
+        label="How's it going?"
+        placeholder="Pick one"
+        options={ratingOptions}
+        placement="origin"
+      />
+
+      <div class="field">
+        <label class="field__label" for="feedback-note">Your message</label>
+        <textarea
+          class="field__input field__input--area"
+          id="feedback-note"
+          name="note"
+          rows="4"
+          placeholder="What worked, what didn't…"
+          required></textarea>
+      </div>
+
+      <button class="demo-form__submit" type="submit">
+        <Icon name="send" size={16} />
+        Send feedback
+      </button>
+    </div>
+
+    <div class="demo-form__success" role="status">
+      <span class="demo-form__check"
+        ><Icon name="circle-check" size={40} /></span
+      >
+      <h3>Thanks for the note</h3>
+      <p>Every bit of feedback shapes what ships next.</p>
+      <button class="demo-form__done" type="button" data-modal-close
+        >Done</button
+      >
+    </div>
+  </form>
+</Modal>
+
+<style>
+  /* Inset grouped list, à la the Settings app: one rounded container, rows
+     divided by hairlines. No hover — only a press tint and a keyboard ring. */
+  .entries {
+    grid-column: 1 / -1;
+    width: min(100%, 30rem);
+    overflow: hidden;
+
+    border: 1px solid var(--ex-sep);
+    border-radius: var(--ex-radius);
+    background: var(--surface);
+  }
+
+  .row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.85rem 1rem;
+
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  /* Hairline separator inset to the text, the way grouped lists divide rows. */
+  .separator {
+    height: 1px;
+    margin-left: 1rem;
+    background: var(--ex-sep);
+  }
+
+  .row[data-deltached-morphing] {
+    background: transparent;
+  }
+
+  .row:active {
+    background: var(--ex-fill);
+  }
+
+  .row:focus-visible {
+    outline: none;
+    background: var(--ex-fill);
+  }
+
+  .row__text {
+    flex: 1;
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .row__title {
+    font-size: 0.95rem;
+    font-weight: 530;
+    letter-spacing: -0.01em;
+  }
+
+  .row__sub {
+    color: var(--ex-label-2);
+    font-size: 0.82rem;
+  }
+
+  .row__chevron {
+    flex: 0 0 auto;
+    color: var(--ex-label-3);
+    margin-right: -0.15rem;
+  }
+</style>
+
+<style is:global>
+  .ex-form .modal__panel {
+    width: min(100% - 2rem, 32rem);
+  }
+
+  .demo-form__lead {
+    margin: 0 0 0.5rem;
+    color: var(--ex-label-2);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .demo-form__fields {
+    display: grid;
+    gap: 1.1rem;
+  }
+
+  .demo-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Shared field scaffolding for plain inputs and the custom selects. */
+  .field {
+    display: grid;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .field__label {
+    font-size: 0.8rem;
+    font-weight: 510;
+    letter-spacing: -0.004em;
+    color: var(--ex-label-2);
+  }
+
+  /* Filled fields, à la iOS forms: a soft systemGray6 fill, no resting border,
+     and a blue ring on focus. */
+  .field__input {
+    width: 100%;
+    padding: 0.72rem 0.85rem;
+
+    border: 1px solid transparent;
+    border-radius: var(--ex-radius);
+    background: var(--ex-fill);
+    color: var(--fg);
+
+    font: inherit;
+    font-size: 0.95rem;
+    transition:
+      background var(--ease),
+      border-color var(--ease),
+      box-shadow var(--ease);
+  }
+
+  .field__input::placeholder {
+    color: var(--ex-label-3);
+  }
+
+  .field__input:focus-visible {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--ex-accent);
+    box-shadow: 0 0 0 3.5px
+      color-mix(in srgb, var(--ex-accent) 22%, transparent);
+  }
+
+  .field__input--area {
+    resize: vertical;
+    min-height: 4.5rem;
+    line-height: 1.5;
+  }
+
+  .demo-form__submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    padding: 0.82rem 1rem;
+
+    border: 0;
+    border-radius: var(--ex-radius);
+    background: var(--ex-accent);
+    color: #fff;
+
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 590;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: background var(--ease);
+  }
+
+  .demo-form__submit:active {
+    background: var(--ex-accent-press);
+  }
+
+  .demo-form__submit:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3.5px
+      color-mix(in srgb, var(--ex-accent) 30%, transparent);
+  }
+
+  /* Success state: hidden until the form reports it was sent. */
+  .demo-form__success {
+    display: none;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: 1.75rem 0.5rem 0.5rem;
+    text-align: center;
+  }
+
+  .demo-form[data-sent] .demo-form__fields {
+    display: none;
+  }
+
+  .demo-form[data-sent] .demo-form__success {
+    display: grid;
+  }
+
+  .demo-form__check {
+    color: #34c759; /* systemGreen */
+  }
+
+  .demo-form__success h3 {
+    margin: 0.4rem 0 0;
+    font-size: 1.2rem;
+    font-weight: 620;
+    letter-spacing: -0.02em;
+  }
+
+  .demo-form__success p {
+    margin: 0.15rem 0 0;
+    max-width: 22rem;
+    color: var(--ex-label-2);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+
+  .demo-form__done {
+    margin-top: 0.85rem;
+    padding: 0.62rem 1.4rem;
+
+    border: 0;
+    border-radius: var(--ex-radius);
+    background: var(--ex-fill);
+    color: var(--ex-accent);
+
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 560;
+    cursor: pointer;
+    transition: background var(--ease);
+  }
+
+  .demo-form__done:active {
+    background: var(--ex-fill-press);
+  }
+
+  @media (max-width: 520px) {
+    .demo-form__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

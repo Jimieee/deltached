@@ -1,0 +1,247 @@
+---
+/**
+ * A fully custom <select> — built from `<div>`/`<button>`, never the native
+ * control — whose option list IS a deltached morph.
+ *
+ * The trigger is a `[data-modal-open]` button and the list is a chromeless
+ * nested `<Modal>` that grows out of the trigger (origin placement), so the
+ * popover literally morphs from the field it belongs to. `custom-select.ts`
+ * reflects the picked option back onto the trigger label and the hidden form
+ * input; everything else (open/close, focus, escape, click-outside, the morph
+ * itself) is the same generic modal + deltached pipeline every other example
+ * uses. No bespoke popover code.
+ *
+ * IMPORTANT: the HOST modal (e.g. the form) must use `center` placement. Origin
+ * placement leaves an inline `transform` on the open panel, which would become
+ * the containing block for this popover's `position: fixed` and desync its
+ * viewport-rect morph. Centered panels carry no transform, so the nested
+ * fixed popover stays viewport-anchored — see Modal `layer`.
+ */
+import type { Placement } from "deltached";
+import Icon from "../Icon.astro";
+import Modal from "../Modal.astro";
+
+interface Option {
+  value: string;
+  label: string;
+  hint?: string;
+}
+
+interface Props {
+  /** Unique id; namespaces the popover modal and the `data-cs` wiring. */
+  id: string;
+  /** Form field name carried by the hidden input. */
+  name: string;
+  label: string;
+  placeholder?: string;
+  options: Option[];
+  /** Growth direction of the popover. Defaults to the flip-aware dropdown. */
+  placement?: Extract<Placement, `origin${string}`>;
+  /** z-index layer of the popover; must sit above its host modal. */
+  layer?: number;
+}
+
+const {
+  id,
+  name,
+  label,
+  placeholder = "Select…",
+  options,
+  placement = "origin-auto",
+  layer = 2,
+} = Astro.props;
+
+const popId = `${id}-pop`;
+---
+
+<div class="field">
+  <span class="field__label" id={`${id}-label`}>{label}</span>
+
+  <div class="cs" data-cs={id}>
+    <button
+      class="cs__trigger"
+      type="button"
+      data-cs-trigger
+      data-modal-open={popId}
+      data-modal-placement={placement}
+      aria-haspopup="listbox"
+      aria-labelledby={`${id}-label ${id}-value`}
+    >
+      <span class="cs__value" id={`${id}-value`} data-cs-label
+        >{placeholder}</span
+      >
+      <Icon name="chevron-down" size={18} class="cs__chevron" />
+    </button>
+
+    <input type="hidden" name={name} data-cs-input value="" />
+  </div>
+</div>
+
+<Modal id={popId} bare layer={layer} class="cs-pop" ariaLabel={label}>
+  <div class="cs-pop__list" role="listbox" aria-label={label}>
+    {
+      options.map((option) => (
+        <button
+          class="cs-pop__opt"
+          type="button"
+          role="option"
+          aria-selected="false"
+          data-modal-close
+          data-cs-option={option.value}
+          data-cs-for={id}
+        >
+          <span class="cs-pop__opt-main">
+            <span class="cs-pop__opt-label" data-cs-opt-label>
+              {option.label}
+            </span>
+            {option.hint && <span class="cs-pop__opt-hint">{option.hint}</span>}
+          </span>
+          <Icon name="check" size={16} class="cs-pop__check" />
+        </button>
+      ))
+    }
+  </div>
+</Modal>
+
+<style>
+  /* `.field` / `.field__label` come from the form's global scaffolding so the
+     select sits flush with the plain inputs around it. */
+  .cs {
+    position: relative;
+  }
+
+  /* Same filled treatment as `.field__input`, plus the up/down affordance —
+     this reads as a picker, not a button. */
+  .cs__trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.72rem 0.85rem;
+
+    border: 1px solid transparent;
+    border-radius: var(--ex-radius);
+    background: var(--ex-fill);
+    color: var(--ex-label-3);
+
+    font: inherit;
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      background var(--ease),
+      border-color var(--ease),
+      box-shadow var(--ease);
+  }
+
+  /* deltached drives the trigger during the handoff — don't let our own
+     transition fight its opacity/visibility writes. */
+  .cs__trigger[data-deltached-morphing] {
+    transition: none;
+  }
+
+  .cs__trigger:focus-visible {
+    outline: none;
+    background: var(--surface);
+    border-color: var(--ex-accent);
+    box-shadow: 0 0 0 3.5px
+      color-mix(in srgb, var(--ex-accent) 22%, transparent);
+  }
+
+  /* Once a value is chosen the label is real content, not a placeholder. */
+  .cs__trigger[data-cs-filled] .cs__value {
+    color: var(--fg);
+  }
+
+  .cs__value {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .cs__chevron {
+    color: var(--ex-label-3);
+  }
+</style>
+
+<style is:global>
+  /* The PANEL itself is the card deltached morphs out of the trigger — so the
+     visible surface (border, radius, shadow) IS the thing that grows, never a
+     wrapper that has to fade in over an invisible morph. The high-specificity
+     selector beats the scoped default `.modal__panel`. Pinning forces
+     `overflow: hidden` during the morph, so the inner list can't flash a
+     scrollbar mid-grow. */
+  .modal.cs-pop .modal__panel {
+    width: min(100vw - 2rem, 17rem);
+    max-height: min(17rem, 56dvh);
+    overflow: auto;
+    padding: 0.3rem;
+
+    border: 1px solid var(--ex-sep);
+    border-radius: var(--ex-radius);
+    background: var(--surface);
+    box-shadow: var(--ex-shadow);
+  }
+
+  .cs-pop__list {
+    display: grid;
+    gap: 1px;
+  }
+
+  .cs-pop__opt {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.55rem 0.6rem;
+
+    border: 0;
+    border-radius: var(--ex-radius-sm);
+    background: transparent;
+    color: var(--fg);
+
+    font: inherit;
+    font-size: 0.92rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--ease);
+  }
+
+  .cs-pop__opt:hover,
+  .cs-pop__opt:focus-visible {
+    outline: none;
+    background: var(--ex-fill);
+  }
+
+  .cs-pop__opt-main {
+    flex: 1;
+    display: grid;
+    gap: 0.05rem;
+  }
+
+  .cs-pop__opt-label {
+    font-weight: 450;
+  }
+
+  .cs-pop__opt-hint {
+    color: var(--ex-label-3);
+    font-size: 0.78rem;
+  }
+
+  /* The selected option gets a system-blue checkmark, the way iOS menus mark
+     the active choice. */
+  .cs-pop__check {
+    color: var(--ex-accent);
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity var(--ease),
+      transform var(--ease);
+  }
+
+  .cs-pop__opt[data-cs-active] .cs-pop__check {
+    opacity: 1;
+    transform: scale(1);
+  }
+</style>

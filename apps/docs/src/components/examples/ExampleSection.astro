@@ -30,27 +30,29 @@ const { id, title, description } = Astro.props;
   }
 
   .section__head {
-    max-width: 44rem;
-    margin-bottom: 1.5rem;
+    max-width: 40rem;
+    margin-bottom: 1.75rem;
   }
 
   h2 {
     margin: 0;
     font-size: 1.5rem;
-    font-weight: 650;
-    letter-spacing: -0.02em;
+    font-weight: 640;
+    letter-spacing: -0.022em;
+    line-height: 1.1;
   }
 
   p {
     margin: 0.5rem 0 0;
-    color: var(--muted);
-    font-size: 0.95rem;
+    color: var(--ex-label-2, var(--muted));
+    font-size: 0.975rem;
     line-height: 1.5;
+    letter-spacing: -0.006em;
   }
 
   .section__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: 1.25rem;
   }
 </style>

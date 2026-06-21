@@ -1,0 +1,254 @@
+---
+/**
+ * Fullscreen takeover. A small cover card morphs into a panel that fills the
+ * viewport (center placement, but the panel's own CSS is 100vw × 100dvh), and
+ * the cover image — tagged with the same `data-deltached-id` on the card and on
+ * the reader's hero — flies as a shared element from the thumbnail into the
+ * full-bleed hero instead of crossfading. Proof that "modal" is just the small
+ * end of the same morph: nothing here is dialog-sized.
+ */
+import ExampleSection from "../../components/examples/ExampleSection.astro";
+import Modal from "../../components/Modal.astro";
+import { getProducts } from "../../data/products";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
+const stories = await getProducts();
+
+const priceFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+---
+
+<ExampleSection
+  id={id}
+  title="Fullscreen takeover"
+  description="The same morph, scaled all the way up. A card grows into a panel that fills the viewport, its cover image carried along as a shared element into the full-bleed hero. Close hands it straight back."
+>
+  {
+    stories.map((story) => (
+      <button
+        class="feature"
+        type="button"
+        data-modal-open={`ex-reader-${story.id}`}
+        aria-label={`Open ${story.title}`}
+      >
+        <span
+          class="feature__media"
+          style={`background-image: url("${story.image}")`}
+          data-deltached-id={`reader-media-${story.id}`}
+          aria-hidden="true"
+        />
+        <span class="feature__meta">
+          <span class="feature__title">{story.title}</span>
+          <span class="feature__category">{story.category}</span>
+        </span>
+      </button>
+    ))
+  }
+</ExampleSection>
+
+{
+  stories.map((story) => (
+    <Modal
+      id={`ex-reader-${story.id}`}
+      class="ex-reader"
+      ariaLabel={story.title}
+    >
+      <article class="reader">
+        <div class="reader__heroFrame">
+          <img
+            class="reader__hero"
+            src={story.image}
+            alt={story.title}
+            data-deltached-id={`reader-media-${story.id}`}
+          />
+        </div>
+        <div class="reader__body">
+          <span class="reader__category">{story.category}</span>
+          <h2 class="reader__title">{story.title}</h2>
+          <span class="reader__price">
+            {priceFormatter.format(story.price)}
+          </span>
+          <p class="reader__lead">{story.description}</p>
+          <p class="reader__text">
+            This panel fills the entire viewport, yet it opened with the same
+            controller as a 28rem dialog — deltached only ever morphs one box
+            into another, whatever their sizes. The hero above didn't crossfade;
+            it's the very thumbnail from the card, carried here as a persisted
+            layer and handed back when you close.
+          </p>
+        </div>
+      </article>
+    </Modal>
+  ))
+}
+
+<style>
+  /* Photos/Music-grid cell: the image carries the weight, the caption sits
+     quietly below it. No border, no scrim — content first. */
+  .feature {
+    display: grid;
+    gap: 0.7rem;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+
+  .feature[data-deltached-morphing] {
+    transition: none;
+  }
+
+  .feature__media {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--ex-radius-lg);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: var(--ex-fill);
+    box-shadow: inset 0 0 0 0.5px var(--ex-sep);
+  }
+
+  .feature:focus-visible {
+    outline: none;
+  }
+
+  .feature:focus-visible .feature__media {
+    box-shadow:
+      inset 0 0 0 0.5px var(--ex-sep),
+      0 0 0 3px color-mix(in srgb, var(--ex-accent) 45%, transparent);
+  }
+
+  .feature__meta {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0 0.15rem;
+  }
+
+  .feature__title {
+    font-size: 0.95rem;
+    font-weight: 550;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+
+  .feature__category {
+    font-size: 0.85rem;
+    color: var(--ex-label-2);
+  }
+</style>
+
+<style is:global>
+  /* The fullscreen panel: the morph target is the whole viewport. The double
+     class beats the base `.modal { padding: 1rem }` so nothing gutters it. */
+  .modal.ex-reader {
+    padding: 0;
+  }
+
+  .ex-reader .modal__panel {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  /* Glass close button floating over the photo, à la the Photos viewer. */
+  .ex-reader .modal__close {
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(0, 0, 0, 0.42);
+    color: #fff;
+    backdrop-filter: blur(0.6rem);
+    -webkit-backdrop-filter: blur(0.6rem);
+  }
+
+  .ex-reader .modal__close:hover,
+  .ex-reader .modal__close:focus-visible {
+    background: rgba(0, 0, 0, 0.62);
+    color: #fff;
+  }
+
+  .reader__heroFrame {
+    min-height: clamp(24rem, 58dvh, 42rem);
+    padding: clamp(1rem, 3vw, 2rem);
+
+    display: grid;
+    place-items: center;
+
+    background: var(--ex-fill);
+    overflow: hidden;
+  }
+
+  .reader__hero {
+    display: block;
+
+    width: auto;
+    height: auto;
+
+    max-width: min(100%, 72rem);
+    max-height: min(62dvh, 40rem);
+
+    object-fit: contain;
+    border-radius: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .reader__body {
+    width: min(100% - 2.5rem, 40rem);
+    margin: 0 auto;
+    padding: clamp(1.75rem, 4vh, 2.75rem) 0 4.5rem;
+  }
+
+  .reader__category {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ex-label-2);
+  }
+
+  .reader__title {
+    margin: 0.3rem 0 0;
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    font-weight: 680;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+  }
+
+  .reader__price {
+    display: inline-block;
+    margin-top: 0.85rem;
+    color: var(--ex-accent);
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .reader__lead {
+    margin: 1.4rem 0 0;
+    font-size: 1.15rem;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+
+  .reader__text {
+    margin: 1rem 0 0;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--ex-label-2);
+  }
+</style>

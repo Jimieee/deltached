@@ -1,0 +1,269 @@
+---
+/**
+ * The origin placement family shown as real dropdown menus. Each toolbar button
+ * grows a chromeless menu out of itself in a different direction, so the whole
+ * set — center, the four sides, and the flip-aware auto — reads as UI you'd
+ * actually ship. The PANEL is the menu card (deltached morphs the visible
+ * surface straight out of the button), and these triggers sit on the page, so
+ * origin placement positions each menu against the live viewport.
+ */
+import ExampleSection from "../../components/examples/ExampleSection.astro";
+import Icon from "../../components/Icon.astro";
+import Modal from "../../components/Modal.astro";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
+type Dir =
+  | "origin"
+  | "origin-top"
+  | "origin-bottom"
+  | "origin-left"
+  | "origin-right"
+  | "origin-auto";
+
+interface Menu {
+  id: string;
+  icon: string;
+  label: string;
+  dir: Dir;
+  hint: string;
+  items: { icon: string; label: string }[];
+}
+
+const menus: Menu[] = [
+  {
+    id: "insert",
+    icon: "plus",
+    label: "Insert",
+    dir: "origin-bottom",
+    hint: "Down",
+    items: [
+      { icon: "photo", label: "Image" },
+      { icon: "pencil", label: "Text block" },
+      { icon: "layout-grid", label: "Gallery" },
+      { icon: "paperclip", label: "Attachment" },
+    ],
+  },
+  {
+    id: "account",
+    icon: "user",
+    label: "Account",
+    dir: "origin-top",
+    hint: "Up",
+    items: [
+      { icon: "user", label: "Profile" },
+      { icon: "settings", label: "Settings" },
+      { icon: "bell", label: "Notifications" },
+      { icon: "arrow-right", label: "Sign out" },
+    ],
+  },
+  {
+    id: "share",
+    icon: "share",
+    label: "Share",
+    dir: "origin-right",
+    hint: "Right",
+    items: [
+      { icon: "copy", label: "Copy link" },
+      { icon: "mail", label: "Email" },
+      { icon: "download", label: "Export" },
+      { icon: "world", label: "Publish" },
+    ],
+  },
+  {
+    id: "more",
+    icon: "dots",
+    label: "More",
+    dir: "origin-left",
+    hint: "Left",
+    items: [
+      { icon: "bookmark", label: "Save" },
+      { icon: "star", label: "Favorite" },
+      { icon: "message-circle", label: "Comment" },
+      { icon: "trash", label: "Delete" },
+    ],
+  },
+  {
+    id: "create",
+    icon: "sparkles",
+    label: "Create",
+    dir: "origin",
+    hint: "Center",
+    items: [
+      { icon: "pencil", label: "New doc" },
+      { icon: "layout-grid", label: "New board" },
+      { icon: "calendar", label: "New event" },
+    ],
+  },
+  {
+    id: "filter",
+    icon: "filter",
+    label: "Filter",
+    dir: "origin-auto",
+    hint: "Auto",
+    items: [
+      { icon: "circle-check", label: "Active" },
+      { icon: "clock", label: "Recent" },
+      { icon: "star", label: "Starred" },
+      { icon: "adjustments", label: "Custom" },
+    ],
+  },
+];
+---
+
+<ExampleSection
+  id={id}
+  title="Menus"
+  description="The origin placement family as real dropdowns. Each button grows its menu in a different direction — down, up, right, left, from the center, or auto, which flips toward whichever side has room."
+>
+  <div class="toolbar" role="toolbar" aria-label="Origin placement menus">
+    {
+      menus.map((menu) => (
+        <button
+          class="tool"
+          type="button"
+          data-modal-open={`ex-menu-${menu.id}`}
+          data-modal-placement={menu.dir}
+          aria-haspopup="menu"
+          aria-label={`${menu.label} menu, opens ${menu.hint.toLowerCase()}`}
+        >
+          <Icon name={menu.icon} size={19} class="tool__icon" />
+          <span class="tool__label">{menu.label}</span>
+          <span class="tool__hint">{menu.hint}</span>
+        </button>
+      ))
+    }
+  </div>
+</ExampleSection>
+
+{
+  menus.map((menu) => (
+    <Modal
+      id={`ex-menu-${menu.id}`}
+      bare
+      layer={1}
+      class="ex-menu"
+      ariaLabel={`${menu.label} menu`}
+    >
+      <div class="menu" role="menu" aria-label={menu.label}>
+        {menu.items.map((item) => (
+          <button class="menu__item" type="button" role="menuitem" data-modal-close>
+            <Icon name={item.icon} size={17} class="menu__item-icon" />
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </Modal>
+  ))
+}
+
+<style>
+  .toolbar {
+    /* Span the full section width instead of a single auto-fill card track. */
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.4rem;
+
+    border: 1px solid var(--ex-sep);
+    border-radius: var(--ex-radius-lg);
+    background: var(--surface);
+  }
+
+  .tool {
+    flex: 1 1 6rem;
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: 0.85rem 0.6rem 0.7rem;
+
+    border: 0;
+    border-radius: var(--ex-radius);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .tool[data-deltached-morphing] {
+    transition: none;
+  }
+
+  .tool:active {
+    background: var(--ex-fill);
+  }
+
+  .tool:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ex-accent) 60%, transparent);
+  }
+
+  .tool__icon {
+    color: var(--fg);
+  }
+
+  .tool__label {
+    font-size: 0.84rem;
+    font-weight: 530;
+    letter-spacing: -0.01em;
+  }
+
+  .tool__hint {
+    font-size: 0.74rem;
+    color: var(--ex-label-3);
+  }
+</style>
+
+<style is:global>
+  /* The menu card IS the morph target (high specificity beats the scoped
+     default panel). It grows straight out of the toolbar button. */
+  .modal.ex-menu .modal__panel {
+    width: max-content;
+    min-width: 12rem;
+    padding: 0.3rem;
+
+    border: 1px solid var(--ex-sep);
+    border-radius: var(--ex-radius);
+    background: var(--surface);
+    box-shadow: var(--ex-shadow);
+  }
+
+  .menu {
+    display: grid;
+    gap: 1px;
+  }
+
+  .menu__item {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+
+    border: 0;
+    border-radius: var(--ex-radius-sm);
+    background: transparent;
+    color: var(--fg);
+
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--ease);
+  }
+
+  .menu__item:hover,
+  .menu__item:focus-visible {
+    outline: none;
+    background: var(--ex-fill);
+  }
+
+  .menu__item-icon {
+    color: var(--ex-label-3);
+  }
+</style>

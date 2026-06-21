@@ -12,15 +12,43 @@ interface Props {
    */
   ariaLabel?: string;
   class?: string;
+  /**
+   * Chromeless overlay: no close button, and a fully transparent backdrop (no
+   * dim, no blur) so it can sit on top of another open modal without darkening
+   * it. Used for nested popovers — custom selects, dropdown menus — where the
+   * panel itself is the only visible surface. Click-outside / Escape still close.
+   */
+  bare?: boolean;
+  /**
+   * Stacking layer. Nested overlays (a select opened from inside a form modal)
+   * pass a higher number so they render above their parent. Maps to a z-index
+   * of `var(--z-modal) + layer * 10`; omit for the base layer.
+   */
+  layer?: number;
 }
 
-const { id, title, description, ariaLabel, class: className } = Astro.props;
+const {
+  id,
+  title,
+  description,
+  ariaLabel,
+  class: className,
+  bare = false,
+  layer = 0,
+} = Astro.props;
 
 const titleId = title ? `${id}-title` : undefined;
 const descriptionId = description ? `${id}-description` : undefined;
+const layerStyle = layer ? `--modal-layer: ${layer}` : undefined;
 ---
 
-<div id={id} class:list={["modal", className]} data-modal hidden>
+<div
+  id={id}
+  class:list={["modal", { "modal--bare": bare }, className]}
+  style={layerStyle}
+  data-modal
+  hidden
+>
   <div class="modal__backdrop" data-modal-backdrop></div>
 
   <div
@@ -34,14 +62,18 @@ const descriptionId = description ? `${id}-description` : undefined;
     data-modal-panel
     data-lenis-prevent
   >
-    <button
-      class="modal__close"
-      type="button"
-      aria-label="Close"
-      data-modal-close
-    >
-      <Icon name="x" size={18} />
-    </button>
+    {
+      !bare && (
+        <button
+          class="modal__close"
+          type="button"
+          aria-label="Close"
+          data-modal-close
+        >
+          <Icon name="x" size={18} />
+        </button>
+      )
+    }
 
     {
       title && (
@@ -62,7 +94,7 @@ const descriptionId = description ? `${id}-description` : undefined;
   .modal {
     position: fixed;
     inset: 0;
-    z-index: var(--z-modal);
+    z-index: calc(var(--z-modal) + var(--modal-layer, 0) * 10);
 
     display: grid;
     place-items: center;
@@ -82,6 +114,20 @@ const descriptionId = description ? `${id}-description` : undefined;
     -webkit-backdrop-filter: blur(var(--backdrop-blur));
   }
 
+  /* Chromeless: the backdrop only catches click-outside, never dims the modal
+     it floats above. The popover's consumer class styles the PANEL itself as
+     the card (so deltached morphs the visible surface, not an inner wrapper). */
+  .modal--bare .modal__backdrop {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* No header/close gutter in a popover — the slot content is the whole card. */
+  .modal--bare .modal__body {
+    margin-top: 0;
+  }
+
   .modal__panel {
     position: relative;
     width: min(100% - 2rem, 28rem);
@@ -89,43 +135,41 @@ const descriptionId = description ? `${id}-description` : undefined;
     overflow: auto;
     padding: 1.5rem;
 
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--ex-sep, var(--border));
+    border-radius: var(--ex-radius-lg, var(--radius-lg));
     background: var(--surface);
     color: var(--fg);
     text-align: left;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--ex-shadow, var(--shadow-lg));
   }
 
+  /* iOS-style persistent close affordance: a soft gray circle, not a control
+     that only appears on hover. */
   .modal__close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0.9rem;
+    right: 0.9rem;
 
-    width: 2rem;
-    height: 2rem;
+    width: 1.85rem;
+    height: 1.85rem;
     display: grid;
     place-items: center;
 
     border: 0;
     border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--muted);
+    background: var(--ex-fill, var(--surface-active));
+    color: var(--ex-label-3, var(--muted));
     cursor: pointer;
     transition:
       background var(--ease),
-      color var(--ease),
-      transform var(--ease);
+      color var(--ease);
   }
 
   .modal__close:hover,
   .modal__close:focus-visible {
-    background: var(--surface-hover);
-    color: var(--fg);
-  }
-
-  .modal__close:active {
-    transform: scale(0.94);
+    outline: none;
+    background: var(--ex-fill-press, var(--surface-hover));
+    color: var(--ex-label-2, var(--fg));
   }
 
   .modal__header {
@@ -134,15 +178,16 @@ const descriptionId = description ? `${id}-description` : undefined;
 
   h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     line-height: 1.15;
-    font-weight: 650;
+    font-weight: 620;
+    letter-spacing: -0.02em;
   }
 
   p {
     max-width: 28rem;
-    margin: 0.45rem 0 0;
-    color: var(--muted);
+    margin: 0.4rem 0 0;
+    color: var(--ex-label-2, var(--muted));
     font-size: 0.9rem;
     line-height: 1.45;
   }

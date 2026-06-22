@@ -1,6 +1,6 @@
 {
   "name": "deltached",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "An interruptible shared-element morph controller for the web.",
   "type": "module",
   "sideEffects": false,

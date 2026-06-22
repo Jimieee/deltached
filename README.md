@@ -102,4 +102,4 @@ before opening a pull request, and note the
 
 ## License
 
-[MIT](./LICENSE) © Jimieee
+The scripts and documentation in this project are released under the [MIT](./LICENSE)

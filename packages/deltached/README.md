@@ -79,4 +79,4 @@ panel
 
 ## License
 
-[MIT](https://github.com/Jimieee/deltached/blob/main/LICENSE) © Jimieee
+The scripts and documentation in this project are released under the [MIT](https://github.com/Jimieee/deltached/blob/main/LICENSE)

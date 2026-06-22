@@ -1,6 +1,4 @@
-import { fetchJson } from "./http";
-
-/** Normalized person used by the Profiles example cards. */
+/** Normalized person available to profile examples. */
 export interface Profile {
   id: string;
   name: string;
@@ -9,29 +7,51 @@ export interface Profile {
   email: string;
 }
 
-interface RandomUserResponse {
-  results: Array<{
-    login: { uuid: string };
-    name: { first: string; last: string };
-    picture: { large: string };
-    location: { city: string; country: string };
-    email: string;
-  }>;
-}
+const PROFILES: Profile[] = [
+  {
+    id: "maya-chen",
+    name: "Maya Chen",
+    avatar: "https://i.pravatar.cc/400?img=47",
+    location: "Vancouver, Canada",
+    email: "maya@example.com",
+  },
+  {
+    id: "theo-martin",
+    name: "Theo Martin",
+    avatar: "https://i.pravatar.cc/400?img=12",
+    location: "Lyon, France",
+    email: "theo@example.com",
+  },
+  {
+    id: "ines-santos",
+    name: "Ines Santos",
+    avatar: "https://i.pravatar.cc/400?img=32",
+    location: "Porto, Portugal",
+    email: "ines@example.com",
+  },
+  {
+    id: "noah-wilson",
+    name: "Noah Wilson",
+    avatar: "https://i.pravatar.cc/400?img=11",
+    location: "Auckland, New Zealand",
+    email: "noah@example.com",
+  },
+  {
+    id: "amara-okafor",
+    name: "Amara Okafor",
+    avatar: "https://i.pravatar.cc/400?img=45",
+    location: "Lagos, Nigeria",
+    email: "amara@example.com",
+  },
+  {
+    id: "lucas-silva",
+    name: "Lucas Silva",
+    avatar: "https://i.pravatar.cc/400?img=68",
+    location: "Curitiba, Brazil",
+    email: "lucas@example.com",
+  },
+];
 
-// A fixed `seed` keeps builds deterministic — same six people every time.
-const ENDPOINT =
-  "https://randomuser.me/api/?results=6&inc=name,picture,location,email,login&seed=deltached&noinfo";
-
-/** Source: randomuser.me — free, no key. */
 export async function getProfiles(): Promise<Profile[]> {
-  const data = await fetchJson<RandomUserResponse>(ENDPOINT);
-
-  return data.results.map((user) => ({
-    id: user.login.uuid,
-    name: `${user.name.first} ${user.name.last}`,
-    avatar: user.picture.large,
-    location: `${user.location.city}, ${user.location.country}`,
-    email: user.email,
-  }));
+  return PROFILES;
 }

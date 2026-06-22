@@ -17,14 +17,20 @@ interface Viewport {
 export function parseRadius(canonical: string): number[] {
   const [h, v] = canonical.split("/");
   const nums = (s: string) =>
-    s.trim().split(/\s+/).map((n) => parseFloat(n) || 0);
+    s
+      .trim()
+      .split(/\s+/)
+      .map((n) => parseFloat(n) || 0);
   const fill = (arr: number[]) =>
     [0, 1, 2, 3].map((i) => arr[i] ?? arr[arr.length - 1] ?? 0);
   return [...fill(nums(h)), ...fill(nums(v ?? h))];
 }
 
 export function radiusToString(r: number[]): string {
-  return `${r.slice(0, 4).map((n) => `${n}px`).join(" ")} / ${r
+  return `${r
+    .slice(0, 4)
+    .map((n) => `${n}px`)
+    .join(" ")} / ${r
     .slice(4)
     .map((n) => `${n}px`)
     .join(" ")}`;

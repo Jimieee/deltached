@@ -1,0 +1,144 @@
+---
+/**
+ * API reference table rendered as a grouped list (not a `<table>`), so it stays
+ * readable from phone to desktop: each row is a card with the member name + type
+ * on one line, an optional default chip, and the description below. `type` and
+ * `description` accept inline HTML (authored in this repo) so signatures and
+ * `<code>` references render properly.
+ */
+interface Row {
+  name: string;
+  type: string;
+  /** Shown as a chip when present. */
+  default?: string;
+  /** Renders a "required" chip when no default is given. */
+  required?: boolean;
+  description: string;
+}
+
+interface Props {
+  rows: Row[];
+}
+
+const { rows } = Astro.props;
+---
+
+<dl class="pt">
+  {
+    rows.map((row) => (
+      <div class="pt__row">
+        <dt class="pt__head">
+          <code class="pt__name">{row.name}</code>
+          <code class="pt__type" set:html={row.type} />
+          {row.default !== undefined ? (
+            <span class="pt__default">
+              <span class="pt__default-key">default</span>
+              <code>{row.default}</code>
+            </span>
+          ) : row.required ? (
+            <span class="pt__required">required</span>
+          ) : null}
+        </dt>
+        <dd class="pt__desc" set:html={row.description} />
+      </div>
+    ))
+  }
+</dl>
+
+<style>
+  .pt {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .pt__row {
+    padding: 0.95rem 1.1rem;
+  }
+
+  .pt__row + .pt__row {
+    border-top: 1px solid var(--border);
+  }
+
+  .pt__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.45rem 0.7rem;
+  }
+
+  .pt__name {
+    color: var(--fg);
+    font-size: 0.88rem;
+    font-weight: 600;
+  }
+
+  .pt__type {
+    color: var(--ex-accent, #0071e3);
+    font-size: 0.8rem;
+    word-break: break-word;
+  }
+
+  .pt__default,
+  .pt__required {
+    margin-left: auto;
+    font-size: 0.72rem;
+  }
+
+  .pt__default {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--muted);
+  }
+
+  .pt__default-key {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.62rem;
+  }
+
+  .pt__default code {
+    padding: 0.05em 0.4em;
+    border-radius: var(--radius-xs);
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+    color: var(--fg-soft);
+    font-size: 0.78rem;
+  }
+
+  .pt__required {
+    color: #ff9500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.62rem;
+    font-weight: 600;
+  }
+
+  .pt__desc {
+    margin: 0.5rem 0 0;
+    color: var(--fg-soft);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .pt__desc :global(code),
+  .pt__name,
+  .pt__type,
+  .pt__default code {
+    font-family: "Geist Mono Variable", ui-monospace, monospace;
+  }
+
+  .pt__desc :global(code) {
+    padding: 0.05em 0.35em;
+    border-radius: var(--radius-xs);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    font-size: 0.85em;
+  }
+
+  .pt__desc :global(strong) {
+    color: var(--fg);
+    font-weight: 580;
+  }
+</style>

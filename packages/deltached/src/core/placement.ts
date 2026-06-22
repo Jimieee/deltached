@@ -182,9 +182,18 @@ export function resolveOriginGeometry(
     // near an edge and stays centered when the source is central.
     const vSide = resolveAutoDirection(src, viewport, margin);
     x = placeAxisProportional(src.x, src.width, width, viewport.width, margin);
-    y = placeAxis(ORIGIN_ANCHORS[vSide].y, src.y, src.height, height, viewport.height, margin);
+    y = placeAxis(
+      ORIGIN_ANCHORS[vSide].y,
+      src.y,
+      src.height,
+      height,
+      viewport.height,
+      margin,
+    );
   } else {
-    const anchor = ORIGIN_ANCHORS[placement as DirectionalPlacement] ?? ORIGIN_ANCHORS.origin;
+    const anchor =
+      ORIGIN_ANCHORS[placement as DirectionalPlacement] ??
+      ORIGIN_ANCHORS.origin;
     x = placeAxis(anchor.x, src.x, src.width, width, viewport.width, margin);
     y = placeAxis(anchor.y, src.y, src.height, height, viewport.height, margin);
   }

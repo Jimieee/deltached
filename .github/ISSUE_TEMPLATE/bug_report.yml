@@ -1,0 +1,72 @@
+name: Bug report
+description: Report a reproducible problem with deltached
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve deltached. A small reproduction is the fastest way to get a useful answer.
+
+  - type: checkboxes
+    id: existing
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and did not find this problem.
+          required: true
+        - label: This is not a security vulnerability. Security reports must be submitted privately.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: deltached version
+      description: The exact installed version, such as 0.1.0.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and version, operating system, framework (if any), and relevant dependency versions.
+      placeholder: |
+        Browser: Chrome 145
+        OS: macOS 15
+        Framework: Vanilla / React / Vue / other
+        GSAP: 3.x
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Explain the actual behavior and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Link a small repository or playground, or provide the shortest code and steps that reproduce the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add screenshots, recordings, console output, or anything else that may help. Please remove secrets and personal data.
+
+  - type: checkboxes
+    id: conduct
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

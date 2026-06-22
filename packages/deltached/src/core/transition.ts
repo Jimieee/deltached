@@ -25,10 +25,7 @@ import {
   isOriginPlacement,
   resolveOriginGeometry,
 } from "./placement";
-import {
-  PersistSession,
-  resolvePersistConfig,
-} from "../persist/session";
+import { PersistSession, resolvePersistConfig } from "../persist/session";
 import type { ResolvedPersistConfig } from "../persist/types";
 import type {
   ElementGeometry,
@@ -352,7 +349,12 @@ export class DeltachedTransition {
           setWillChange(this.target);
           tl = buildEnterTimeline(els, this.naturalGeo!, t);
           // Reverse the preserved layers back to the target with the surface.
-          this.persistSession?.retarget(tl, t.enterDuration, t.enterEase, "enter");
+          this.persistSession?.retarget(
+            tl,
+            t.enterDuration,
+            t.enterEase,
+            "enter",
+          );
         }
 
         tl.eventCallback("onComplete", () => this.finishEnter());
@@ -441,7 +443,12 @@ export class DeltachedTransition {
             // Resumed mid-enter: reverse the PRESERVED layers back to the
             // source so the persisted children ride home with the surface
             // instead of being dropped.
-            this.persistSession?.retarget(tl, t.leaveDuration, t.leaveEase, "leave");
+            this.persistSession?.retarget(
+              tl,
+              t.leaveDuration,
+              t.leaveEase,
+              "leave",
+            );
           } else {
             session?.attach(tl, t.leaveDuration, t.leaveEase);
             this.persistSession = session;

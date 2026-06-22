@@ -1,30 +1,172 @@
 ---
+import { getCollection, render } from "astro:content";
+import Callout from "../components/docs/Callout.astro";
+import { REPO, withBase } from "../config/nav";
 import Base from "../layouts/Base.astro";
+
+const [changelog] = await getCollection("changelog");
+
+if (!changelog) {
+  throw new Error("packages/deltached/CHANGELOG.md was not found");
+}
+
+const { Content } = await render(changelog);
+const hasPublishedReleases = /^##\s+/m.test(changelog.body ?? "");
 ---
 
-<Base title="deltached — changelog">
+<Base
+  title="deltached — changelog"
+  description="Notable changes to deltached, newest first."
+>
   <main class="page">
-    <h1>Changelog</h1>
-    <p>Release notes will appear here.</p>
+    <header class="intro">
+      <p class="eyebrow">Changelog</p>
+      <h1>What's changed.</h1>
+      <p class="lead">
+        Notable package changes, newest first. Versions follow <a
+          href="https://semver.org"
+          target="_blank"
+          rel="noreferrer">Semantic Versioning</a
+        > and are assembled from the changesets included with each pull request.
+      </p>
+    </header>
+
+    <Callout kind="note" title="Unreleased changes">
+      Work planned for a future version lives on the <a
+        href={withBase("/roadmap")}>roadmap</a
+      >. Accepted package changes are collected into a reviewed release pull request
+      before anything is published.
+    </Callout>
+
+    {
+      hasPublishedReleases ? (
+        <article class="changelog">
+          <Content />
+        </article>
+      ) : (
+        <p class="empty">
+          The first release is being prepared. Its notes will appear here when the
+          release pull request is generated.
+        </p>
+      )
+    }
+
+    <p class="footer-note">
+      Exact publication dates and immutable snapshots are available on <a
+        href={`${REPO}/releases`}
+        target="_blank"
+        rel="noreferrer">GitHub Releases</a
+      >.
+    </p>
   </main>
 
   <style>
     .page {
-      display: grid;
-      gap: 0.5rem;
-      justify-items: center;
-      text-align: center;
-      padding: 5rem 2rem;
+      --ex-accent: #0071e3;
+
+      width: min(100%, 52rem);
+      margin: 0 auto;
+      padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
     }
+
+    .intro {
+      max-width: 42rem;
+      margin-bottom: 2rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.6rem;
+      color: var(--ex-accent);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
     h1 {
       margin: 0;
-      font-size: 2rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
+      font-size: clamp(2.1rem, 5vw, 3rem);
+      font-weight: 680;
+      letter-spacing: -0.028em;
+      line-height: 1.04;
     }
-    p {
-      margin: 0;
+
+    .lead {
+      margin: 1rem 0 0;
+      max-width: 40rem;
       color: var(--muted);
+      font-size: 1.0625rem;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
+    }
+
+    .changelog,
+    .empty {
+      margin-top: 2.5rem;
+    }
+
+    .changelog :global(h1) {
+      display: none;
+    }
+
+    .changelog :global(h2) {
+      margin: 2.75rem 0 0.65rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-family: "Geist Mono Variable", ui-monospace, monospace;
+      font-size: 1.35rem;
+      font-weight: 660;
+      letter-spacing: -0.02em;
+    }
+
+    .changelog :global(h2:first-of-type) {
+      margin-top: 0;
+    }
+
+    .changelog :global(h3) {
+      display: inline-flex;
+      margin: 1.15rem 0 0.25rem;
+      padding: 0.16rem 0.6rem;
+      border-radius: var(--radius-pill);
+      background: color-mix(in srgb, var(--ex-accent) 12%, transparent);
+      color: var(--ex-accent);
+      font-size: 0.72rem;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .changelog :global(ul) {
+      display: grid;
+      gap: 0.55rem;
+      margin: 0.75rem 0 0;
+      padding-left: 1.2rem;
+    }
+
+    .changelog :global(li),
+    .changelog :global(p),
+    .empty {
+      color: var(--fg-soft);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .changelog :global(li::marker) {
+      color: var(--ex-accent);
+    }
+
+    .footer-note {
+      margin: 3.5rem 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--ex-accent);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
     }
   </style>
 </Base>

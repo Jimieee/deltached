@@ -82,6 +82,16 @@ code,
 pre,
 kbd {
   font-family: "Geist Mono Variable", ui-monospace, monospace;
+  /*
+   * Disable Geist Mono's coding ligatures everywhere code is shown. They fuse
+   * sequences like `<!--`, `-->` and `=>` into single glyphs, which misrepresents
+   * the literal source in docs — what you read must be what you'd type.
+   */
+  font-variant-ligatures: none;
+  font-feature-settings:
+    "liga" 0,
+    "calt" 0,
+    "dlig" 0;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -363,4 +373,44 @@ html[data-route-nav-transition]::view-transition-new(root) {
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------------- */
+/* Docs code surface                                                       */
+/* ----------------------------------------------------------------------- */
+
+/*
+ * Shared token styling for every Shiki-rendered block (CodeBlock + the panels
+ * inside CodeGroup). Shiki inlines per-token colors on the spans and a
+ * background/foreground on the <pre>; we reset that surface so the component
+ * chrome owns it, keep the token colors, and make the code horizontally
+ * scrollable in its own right with the mono font scale.
+ */
+.dc-code {
+  --dc-code-pad: 1rem 1.1rem;
+  overflow: hidden;
+}
+
+/*
+ * Code soft-wraps rather than scrolling horizontally: a deeply-indented line
+ * never disappears off the right edge (the old behavior read as "cut off" on
+ * narrower windows). Indentation is preserved by `pre-wrap`; an overlong token
+ * breaks as a last resort. `.line` stays inline (Shiki's default) so the
+ * inter-line newlines drive the breaks and wrapping adds no extra blank rows.
+ */
+.dc-code pre.shiki {
+  margin: 0;
+  padding: var(--dc-code-pad);
+  background: transparent !important;
+
+  font-family: "Geist Mono Variable", ui-monospace, monospace;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.dc-code pre.shiki:focus-visible {
+  outline: none;
 }

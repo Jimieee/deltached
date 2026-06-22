@@ -13,10 +13,7 @@ import { gsap } from "gsap";
 import { builtinPersistAdapters, defaultClassify } from "./adapters";
 import { persistFrameVars, positionToTime } from "./flight";
 import { insetFrame, insetFrameLerp, lerpRadius } from "./geometry";
-import {
-  capturePersistSnapshots,
-  pairPersistSnapshots,
-} from "./measure";
+import { capturePersistSnapshots, pairPersistSnapshots } from "./measure";
 import {
   DEFAULT_PERSIST_ATTRIBUTE,
   type PersistAdapter,
@@ -210,10 +207,7 @@ export class PersistSession {
    *    starting at the OLD rect (the "to" layer hidden and on top);
    * 3. append the overlay last so it paints above the pinned surface.
    */
-  public mount(
-    surfaceFrom: ElementGeometry,
-    surfaceTo: ElementGeometry,
-  ): void {
+  public mount(surfaceFrom: ElementGeometry, surfaceTo: ElementGeometry): void {
     if (!this.pairs.length || this.done || this.overlay) return;
     this.surfaceFrom = surfaceFrom;
     this.surfaceTo = surfaceTo;
@@ -482,24 +476,60 @@ export class PersistSession {
         const back = persistFrameVars(dest);
         const destAlpha = parseFloat(dest.computed.opacity) || 1;
         if (destLayer) {
-          timeline.to(destLayer.outer, { ...back, duration, ease: geometryEase }, 0);
-          timeline.to(destLayer.outer, { autoAlpha: destAlpha, duration: winSec, ease: h.easing }, winStart);
+          timeline.to(
+            destLayer.outer,
+            { ...back, duration, ease: geometryEase },
+            0,
+          );
+          timeline.to(
+            destLayer.outer,
+            { autoAlpha: destAlpha, duration: winSec, ease: h.easing },
+            winStart,
+          );
         }
         if (otherLayer) {
-          timeline.to(otherLayer.outer, { ...back, duration, ease: geometryEase }, 0);
-          timeline.to(otherLayer.outer, { autoAlpha: 0, duration: winSec, ease: h.easing }, winStart);
+          timeline.to(
+            otherLayer.outer,
+            { ...back, duration, ease: geometryEase },
+            0,
+          );
+          timeline.to(
+            otherLayer.outer,
+            { autoAlpha: 0, duration: winSec, ease: h.easing },
+            winStart,
+          );
         }
         // Text scales its inner; return it to natural (1) so the winning
         // layer matches the real element exactly at settle.
         if (pair.kind === "text") {
-          if (destLayer) timeline.to(destLayer.inner, { scale: 1, duration, ease: geometryEase }, 0);
-          if (otherLayer) timeline.to(otherLayer.inner, { scale: 1, duration, ease: geometryEase }, 0);
+          if (destLayer)
+            timeline.to(
+              destLayer.inner,
+              { scale: 1, duration, ease: geometryEase },
+              0,
+            );
+          if (otherLayer)
+            timeline.to(
+              otherLayer.inner,
+              { scale: 1, duration, ease: geometryEase },
+              0,
+            );
         }
       } else {
         // The heading side has no counterpart for this child — it does not
         // exist there, so whatever is showing dissolves away in place.
-        if (destLayer) timeline.to(destLayer.outer, { autoAlpha: 0, duration: winSec, ease: h.easing }, winStart);
-        if (otherLayer) timeline.to(otherLayer.outer, { autoAlpha: 0, duration: winSec, ease: h.easing }, winStart);
+        if (destLayer)
+          timeline.to(
+            destLayer.outer,
+            { autoAlpha: 0, duration: winSec, ease: h.easing },
+            winStart,
+          );
+        if (otherLayer)
+          timeline.to(
+            otherLayer.outer,
+            { autoAlpha: 0, duration: winSec, ease: h.easing },
+            winStart,
+          );
       }
     }
   }

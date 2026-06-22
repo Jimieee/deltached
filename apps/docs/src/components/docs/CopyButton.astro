@@ -1,0 +1,89 @@
+---
+/**
+ * Copy-to-clipboard button for code blocks. Pure markup contract for
+ * `copy-button.ts` (already wired globally): `data-copy` holds the text, the two
+ * `data-copy-icon` spans are cross-faded on success. No per-block JS.
+ */
+import Icon from "../Icon.astro";
+
+interface Props {
+  /** Exact text placed on the clipboard. */
+  text: string;
+  class?: string;
+}
+
+const { text, class: className } = Astro.props;
+---
+
+<button
+  class:list={["copy", className]}
+  type="button"
+  data-copy={text}
+  aria-label="Copy code"
+>
+  <span class="copy__icon" data-copy-icon="copy">
+    <Icon name="copy" size={16} />
+  </span>
+  <span class="copy__icon copy__icon--check" data-copy-icon="check">
+    <Icon name="check" size={16} />
+  </span>
+</button>
+
+<style>
+  .copy {
+    position: relative;
+    isolation: isolate;
+    flex: 0 0 auto;
+
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    color: var(--muted);
+
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      color var(--ease),
+      background var(--ease),
+      border-color var(--ease),
+      transform var(--ease);
+  }
+
+  .copy__icon {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    will-change: opacity, transform, filter;
+  }
+
+  .copy__icon--check {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.72);
+    filter: blur(6px);
+  }
+
+  .copy:hover,
+  .copy:focus-visible {
+    outline: none;
+    color: var(--fg);
+    background: var(--surface-hover);
+  }
+
+  .copy:active {
+    transform: scale(0.94);
+  }
+
+  .copy[data-copied="true"] {
+    color: var(--fg);
+    background: var(--surface-success);
+    border-color: color-mix(in srgb, #34c759 35%, var(--border));
+  }
+</style>

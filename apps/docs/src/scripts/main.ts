@@ -1,3 +1,4 @@
+import { initCodeTabs } from "./code-tabs";
 import { initCopyButtons } from "./copy-button";
 import { initCustomSelects } from "./custom-select";
 import {
@@ -17,6 +18,7 @@ let teardownFormsDemo: (() => void) | null = null;
 let teardownSmoothScroll: (() => void) | null = null;
 let teardownScrollbar: (() => void) | null = null;
 let teardownNav: (() => void) | null = null;
+let teardownCodeTabs: (() => void) | null = null;
 
 initNavRouteTransitions();
 
@@ -33,6 +35,7 @@ function initPage() {
   teardownCustomSelects = initCustomSelects();
   teardownFormsDemo = initFormsDemo();
   teardownCopyButtons = initCopyButtons();
+  teardownCodeTabs = initCodeTabs();
 }
 
 function destroyPage() {
@@ -41,6 +44,8 @@ function destroyPage() {
   teardownModals = null;
   teardownCopyButtons?.();
   teardownCopyButtons = null;
+  teardownCodeTabs?.();
+  teardownCodeTabs = null;
   teardownCustomSelects?.();
   teardownCustomSelects = null;
   teardownFormsDemo?.();

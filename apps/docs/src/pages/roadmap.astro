@@ -1,30 +1,414 @@
 ---
+import Callout from "../components/docs/Callout.astro";
+import { REPO } from "../config/nav";
 import Base from "../layouts/Base.astro";
+
+/** In-page navbar references — one per horizon below. */
+const references = [
+  { label: "Now", href: "#now" },
+  { label: "Next", href: "#next" },
+  { label: "Exploring", href: "#exploring" },
+  { label: "Principles", href: "#principles" },
+];
+
+type Theme =
+  | "Core"
+  | "DX"
+  | "Persist"
+  | "Ecosystem"
+  | "A11y"
+  | "Performance"
+  | "Interaction"
+  | "Quality";
+
+interface Item {
+  title: string;
+  theme: Theme;
+  body: string;
+}
+
+const now: Item[] = [
+  {
+    title: "Official framework wrappers",
+    theme: "DX",
+    body: "Thin, optional bindings — a React useDeltached hook, a Vue composable, a Svelte action — over the same vanilla controller, handling setup and teardown for you.",
+  },
+  {
+    title: "The interruption test matrix",
+    theme: "Quality",
+    body: "Automated coverage for the hard part: starting enter and leave at every phase, plus placement clamping and persist handoff, so reversals stay glued together.",
+  },
+];
+
+const next: Item[] = [
+  {
+    title: "Scroll-container–aware placement",
+    theme: "Core",
+    body: "Clamp origin panels to their nearest scroll parent, not just the viewport, so dropdowns sit correctly inside overflowing regions.",
+  },
+  {
+    title: "RTL-aware origin placement",
+    theme: "Core",
+    body: "Mirror the directional origin-* growth and viewport clamping for right-to-left layouts.",
+  },
+  {
+    title: "More persist adapters",
+    theme: "Persist",
+    body: "First-class handling for SVG, video, and gradient / background-image elements, beyond today's text, image, canvas, and surface.",
+  },
+  {
+    title: "An opt-in dialog companion",
+    theme: "Ecosystem",
+    body: "A separate, optional package for the modal concerns the core deliberately leaves to you — focus trap, scroll lock, Escape, restore-focus — so they aren't rewritten per app.",
+  },
+];
+
+const exploring: Item[] = [
+  {
+    title: "Gesture-driven dismiss",
+    theme: "Interaction",
+    body: "Hand a pointer's velocity into leave() for drag-to-close that flows out of the same interruptible morph.",
+  },
+  {
+    title: "View Transitions interop",
+    theme: "Core",
+    body: "Bridge in-page morphs with the View Transitions API, for shared elements that survive a route change.",
+  },
+  {
+    title: "List persistence (FLIP)",
+    theme: "Persist",
+    body: "Carry items across add / remove / reorder within a single layout, not only between two layouts.",
+  },
+  {
+    title: "A debug overlay",
+    theme: "DX",
+    body: "A devtool that draws source and target rects and persist layers live — turning persist.debug into something you can see.",
+  },
+];
+
+const principles = [
+  "Core stays measure-and-animate. Focus, scroll lock, and ARIA live in your code or an opt-in package — never bolted onto the core.",
+  "Interruptibility is non-negotiable. Every feature must survive being reversed mid-flight; if it can't, it doesn't ship.",
+  "Framework-agnostic first. Wrappers are thin conveniences over the same vanilla API, never a fork of it.",
+  "Small, with few dependencies. New surface area has to earn its weight.",
+  "1.0 is about trust, not feature count: a stable API, complete docs, and a tested interruption matrix.",
+];
+
+const horizons = [
+  {
+    id: "now",
+    kind: "now",
+    tag: "Now",
+    title: "Building toward v0.2",
+    sub: "Actively in progress.",
+    items: now,
+  },
+  {
+    id: "next",
+    kind: "next",
+    tag: "Next",
+    title: "Planned",
+    sub: "Committed in direction, not yet started.",
+    items: next,
+  },
+  {
+    id: "exploring",
+    kind: "exploring",
+    tag: "Exploring",
+    title: "Research",
+    sub: "Ideas under investigation — some of these will never ship.",
+    items: exploring,
+  },
+] as const;
 ---
 
-<Base title="deltached — roadmap">
+<Base
+  title="deltached — roadmap"
+  description="Where deltached is headed: a directional, horizon-based roadmap."
+  references={references}
+>
   <main class="page">
-    <h1>Roadmap</h1>
-    <p>What's planned for deltached.</p>
+    <header class="intro">
+      <p class="eyebrow">Roadmap</p>
+      <h1>Where deltached is headed.</h1>
+      <p class="lead">
+        A small library with a deliberately small surface. This is the direction
+        of travel — grouped by how soon and how sure, not by date. Confidence is
+        highest in <strong>Now</strong> and lowest in <strong>Exploring</strong
+        >, and the principles at the end shape every call above.
+      </p>
+    </header>
+
+    <Callout kind="note" title="How to read this">
+      These are directions, not dated commitments — deadlines on a young library
+      slip and erode trust, so there are none here on purpose. Items in
+      <strong>Exploring</strong> are research and may never ship. Last reviewed June
+      2026.
+    </Callout>
+
+    {
+      horizons.map((h) => (
+        <section id={h.id} class="sec">
+          <div class="sec__head">
+            <span class:list={["horizon", `horizon--${h.kind}`]}>
+              <span class="horizon__dot" />
+              {h.tag}
+            </span>
+            <h2>{h.title}</h2>
+            <p class="sec__sub">{h.sub}</p>
+          </div>
+
+          <ul class="items">
+            {h.items.map((item) => (
+              <li class="item">
+                <div class="item__top">
+                  <h3>{item.title}</h3>
+                  <span class="tag">{item.theme}</span>
+                </div>
+                <p>{item.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+
+    <section id="principles" class="sec">
+      <div class="sec__head">
+        <h2>Principles &amp; non-goals</h2>
+        <p class="sec__sub">
+          What guides every decision above — and what deltached deliberately
+          won't become.
+        </p>
+      </div>
+      <ul class="principles">
+        {principles.map((p) => <li>{p}</li>)}
+      </ul>
+    </section>
+
+    <p class="footer-note">
+      Have a use case that isn't covered, or think a priority is wrong? <a
+        href={`${REPO}/issues`}
+        target="_blank"
+        rel="noreferrer">Open an issue</a
+      > — real use cases move things up the list.
+    </p>
   </main>
 
   <style>
     .page {
-      display: grid;
-      gap: 0.5rem;
-      justify-items: center;
-      text-align: center;
-      padding: 5rem 2rem;
+      --ex-accent: #0071e3;
+
+      width: min(100%, 52rem);
+      margin: 0 auto;
+      padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
     }
+
+    .intro {
+      max-width: 42rem;
+      margin-bottom: 2rem;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.6rem;
+      color: var(--ex-accent);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
     h1 {
       margin: 0;
-      font-size: 2rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
+      font-size: clamp(2.1rem, 5vw, 3rem);
+      font-weight: 680;
+      letter-spacing: -0.028em;
+      line-height: 1.04;
     }
-    p {
-      margin: 0;
+
+    .lead {
+      margin: 1rem 0 0;
+      max-width: 40rem;
       color: var(--muted);
+      font-size: 1.0625rem;
+      line-height: 1.55;
+      letter-spacing: -0.01em;
+    }
+
+    .lead strong {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    /* Sections + scroll-margin so anchor jumps clear the fixed navbar. */
+    .sec {
+      scroll-margin-top: calc(var(--nav-size) + 1.5rem);
+    }
+
+    .sec + .sec {
+      margin-top: 3rem;
+    }
+
+    /* Make the first horizon sit a touch below the callout. */
+    :global(.callout) + .sec {
+      margin-top: 2.5rem;
+    }
+
+    .sec__head {
+      margin-bottom: 1.25rem;
+    }
+
+    /* Horizon pill: a coloured dot + label, à la a status indicator. */
+    .horizon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+
+      margin-bottom: 0.7rem;
+      padding: 0.28rem 0.7rem 0.28rem 0.6rem;
+
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--fg-soft);
+    }
+
+    .horizon__dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: var(--radius-pill);
+      background: var(--muted);
+    }
+
+    .horizon--now {
+      border-color: color-mix(in srgb, #34c759 35%, var(--border));
+      color: #248a3d;
+    }
+    .horizon--now .horizon__dot {
+      background: #34c759; /* systemGreen — in flight */
+      box-shadow: 0 0 0 3px color-mix(in srgb, #34c759 22%, transparent);
+    }
+
+    .horizon--next {
+      border-color: color-mix(in srgb, var(--ex-accent) 35%, var(--border));
+      color: var(--ex-accent);
+    }
+    .horizon--next .horizon__dot {
+      background: var(--ex-accent); /* systemBlue — planned */
+    }
+
+    .horizon--exploring .horizon__dot {
+      background: transparent;
+      border: 1.5px dashed var(--muted); /* dashed — uncommitted */
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.55rem;
+      font-weight: 650;
+      letter-spacing: -0.024em;
+      line-height: 1.1;
+    }
+
+    .sec__sub {
+      margin: 0.4rem 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Item grid — cards in the examples palette. */
+    .items {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+      gap: 1rem;
+    }
+
+    .item {
+      padding: 1.1rem 1.15rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .item__top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .item h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.014em;
+      line-height: 1.25;
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-xs);
+      background: color-mix(in srgb, var(--fg) 6%, transparent);
+      color: var(--fg-soft);
+      font-size: 0.66rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .item p {
+      margin: 0;
+      color: var(--fg-soft);
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    /* Principles — a grouped list, hairline-divided. */
+    .principles {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .principles li {
+      padding: 0.95rem 1.15rem;
+      color: var(--fg-soft);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .principles li + li {
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-note {
+      margin: 3rem 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--ex-accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-thickness: 1px;
     }
   </style>
 </Base>

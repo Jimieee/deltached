@@ -1,0 +1,112 @@
+---
+/**
+ * An inline aside for the docs prose: a note, a tip, or a caution. Kept
+ * deliberately quiet (a tinted rule + a small glyph) so it punctuates the
+ * reading flow without shouting — the HIG "be informative, not alarming"
+ * register. Body content is the default slot, so it can hold rich markup.
+ */
+import Icon from "../Icon.astro";
+
+type Kind = "note" | "tip" | "caution";
+
+interface Props {
+  kind?: Kind;
+  /** Optional bold lead in the first line; defaults to the kind label. */
+  title?: string;
+}
+
+const { kind = "note", title } = Astro.props;
+
+const META: Record<Kind, { icon: string; label: string }> = {
+  note: { icon: "info-circle", label: "Note" },
+  tip: { icon: "bulb", label: "Tip" },
+  caution: { icon: "alert-triangle", label: "Caution" },
+};
+
+const meta = META[kind];
+---
+
+<aside class:list={["callout", `callout--${kind}`]} role="note">
+  <span class="callout__icon"><Icon name={meta.icon} size={17} /></span>
+  <div class="callout__body">
+    <span class="callout__title">{title ?? meta.label}</span>
+    <slot />
+  </div>
+</aside>
+
+<style>
+  .callout {
+    --c-accent: var(--muted);
+    --c-tint: color-mix(in srgb, var(--fg) 3%, var(--surface));
+
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.7rem;
+    padding: 0.85rem 1rem;
+
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--c-accent);
+    border-radius: var(--radius-sm);
+    background: var(--c-tint);
+  }
+
+  .callout--note {
+    --c-accent: #0071e3; /* system blue */
+    --c-tint: color-mix(in srgb, #0071e3 6%, var(--surface));
+  }
+
+  .callout--tip {
+    --c-accent: #34c759; /* system green */
+    --c-tint: color-mix(in srgb, #34c759 7%, var(--surface));
+  }
+
+  .callout--caution {
+    --c-accent: #ff9500; /* system orange */
+    --c-tint: color-mix(in srgb, #ff9500 8%, var(--surface));
+  }
+
+  .callout__icon {
+    color: var(--c-accent);
+    margin-top: 0.05rem;
+  }
+
+  .callout__body {
+    min-width: 0;
+    color: var(--fg-soft);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .callout__title {
+    color: var(--fg);
+    font-weight: 580;
+    letter-spacing: -0.01em;
+    margin-right: 0.4rem;
+  }
+
+  /* Tighten slotted prose so a single-paragraph callout flows inline after the
+     title, while multi-block content still stacks cleanly. */
+  .callout__body :global(p) {
+    display: inline;
+    margin: 0;
+  }
+
+  .callout__body :global(p + p),
+  .callout__body :global(ul),
+  .callout__body :global(pre) {
+    display: block;
+    margin-top: 0.55rem;
+  }
+
+  .callout__body :global(code) {
+    padding: 0.05em 0.35em;
+    border-radius: var(--radius-xs);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    font-size: 0.85em;
+  }
+
+  .callout__body :global(a) {
+    color: var(--c-accent);
+    text-underline-offset: 2px;
+  }
+</style>

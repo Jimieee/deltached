@@ -11,7 +11,7 @@
     "@fontsource-variable/geist": "^5.2.9",
     "@fontsource-variable/geist-mono": "^5.2.8",
     "@tabler/icons": "^3.44.0",
-    "astro": "^6.4.7",
+    "astro": "^6.4.8",
     "deltached": "workspace:*",
     "gsap": "^3.15.0",
     "lenis": "^1.3.23"

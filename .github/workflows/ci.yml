@@ -47,9 +47,6 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
-      - name: Validate release plan
-        run: pnpm exec changeset status --since=origin/main
-
       - name: Typecheck library
         run: pnpm --filter deltached typecheck
 

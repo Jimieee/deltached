@@ -1,0 +1,282 @@
+---
+/**
+ * Gallery → lightbox: three morphs deep. An album cover grows into a gallery
+ * panel (center placement), every thumbnail inside it grows into a fullscreen
+ * lightbox (origin placement — the image zooms out of the exact thumbnail you
+ * clicked), and the photo persists as a shared element across that zoom. The
+ * gallery is centered on purpose so its nested origin lightboxes stay
+ * viewport-anchored; each layer is the same modal pipeline, just nested.
+ */
+import ExampleSection from "../../components/examples/ExampleSection.astro";
+import Icon from "../../components/Icon.astro";
+import Modal from "../../components/Modal.astro";
+import { getPhotos } from "../../data/photos";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+
+const photos = await getPhotos();
+
+const albums = [
+  {
+    id: "stills",
+    title: "Stills",
+    caption: "Quiet frames",
+    photos: photos.slice(0, 3),
+  },
+  {
+    id: "places",
+    title: "Places",
+    caption: "On the road",
+    photos: photos.slice(3, 6),
+  },
+];
+---
+
+<ExampleSection
+  id={id}
+  title="Gallery → lightbox"
+  description="Three nested morphs. An album opens into a grid, a thumbnail zooms into a lightbox, and the photo travels the whole way as a shared element — then hands back tile-perfect on close. Open one, click a photo, close back down."
+>
+  {
+    albums.map((album) => (
+      <button
+        class="album"
+        type="button"
+        data-modal-open={`ex-album-${album.id}`}
+        aria-label={`Open ${album.title} album`}
+      >
+        <span
+          class="album__cover"
+          style={`background-image: url("${album.photos[0].thumb}")`}
+          aria-hidden="true"
+        />
+        <span class="album__meta">
+          <span class="album__title">{album.title}</span>
+          <span class="album__sub">{album.photos.length} photos</span>
+        </span>
+      </button>
+    ))
+  }
+</ExampleSection>
+
+{
+  albums.map((album) => (
+    <Modal
+      id={`ex-album-${album.id}`}
+      class="ex-album"
+      title={album.title}
+      description={`${album.photos.length} photos · click one to zoom`}
+    >
+      <div class="gallery">
+        {album.photos.map((photo) => (
+          <button
+            class="gallery__tile"
+            type="button"
+            data-modal-open={`ex-light-${photo.id}`}
+            data-modal-placement="origin"
+            aria-label={`Zoom photo by ${photo.author}`}
+          >
+            <span
+              class="gallery__media"
+              style={`background-image: url("${photo.thumb}")`}
+              data-deltached-id={`light-media-${photo.id}`}
+              aria-hidden="true"
+            />
+          </button>
+        ))}
+      </div>
+    </Modal>
+  ))
+}
+
+{
+  photos.map((photo) => (
+    <Modal
+      id={`ex-light-${photo.id}`}
+      class="ex-light"
+      layer={1}
+      ariaLabel={`Photo by ${photo.author}`}
+    >
+      <figure class="light">
+        <img
+          class="light__img"
+          src={photo.full}
+          alt={`Photo by ${photo.author}`}
+          data-deltached-id={`light-media-${photo.id}`}
+        />
+        <figcaption class="light__cap">
+          <Icon name="user" size={14} />
+          {photo.author}
+        </figcaption>
+      </figure>
+    </Modal>
+  ))
+}
+
+<style>
+  /* Photos-style album cell: cover tile, caption beneath. */
+  .album {
+    display: grid;
+    gap: 0.7rem;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--ex-radius-lg);
+    background: none;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+
+  .album[data-deltached-morphing] {
+    transition: none;
+  }
+
+  .album__cover {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--ex-radius-lg);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-color: var(--ex-fill);
+    box-shadow: inset 0 0 0 0.5px var(--ex-sep);
+  }
+
+  .album:focus-visible {
+    outline: none;
+  }
+
+  .album:focus-visible .album__cover {
+    box-shadow:
+      inset 0 0 0 0.5px var(--ex-sep),
+      0 0 0 3px color-mix(in srgb, var(--ex-accent) 45%, transparent);
+  }
+
+  .album__meta {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0 0.15rem;
+  }
+
+  .album__title {
+    font-size: 0.95rem;
+    font-weight: 550;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+
+  .album__sub {
+    font-size: 0.85rem;
+    color: var(--ex-label-2);
+  }
+</style>
+
+<style is:global>
+  .ex-album .modal__panel {
+    width: min(100% - 2rem, 40rem);
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .gallery__tile {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--ex-radius);
+    background: var(--ex-fill);
+    cursor: pointer;
+    box-shadow: inset 0 0 0 0.5px var(--ex-sep);
+  }
+
+  .gallery__tile[data-deltached-morphing] {
+    transition: none;
+  }
+
+  .gallery__tile:focus-visible {
+    outline: none;
+    box-shadow:
+      inset 0 0 0 0.5px var(--ex-sep),
+      0 0 0 3px color-mix(in srgb, var(--ex-accent) 50%, transparent);
+  }
+
+  .gallery__media {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  /* Lightbox: chrome-light panel sized to the photo. */
+  .ex-light .modal__backdrop {
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(0.4rem);
+  }
+
+  .ex-light .modal__panel {
+    width: auto;
+    max-width: min(92vw, 60rem);
+    max-height: min(88dvh, 44rem);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .ex-light .modal__close {
+    top: 2rem;
+    right: 1rem;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    backdrop-filter: blur(0.6rem);
+    -webkit-backdrop-filter: blur(0.6rem);
+  }
+
+  .ex-light .modal__close:hover,
+  .ex-light .modal__close:focus-visible {
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+  }
+
+  .light {
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+    justify-items: center;
+  }
+
+  .light__img {
+    display: block;
+    max-width: min(92vw, 60rem);
+    max-height: min(80dvh, 40rem);
+    width: auto;
+    height: auto;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .light__cap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.85rem;
+  }
+</style>

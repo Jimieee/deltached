@@ -88,7 +88,11 @@ export function buildEnterTimeline(
     if (t.contentBlur > 0) {
       tl.to(
         els.content,
-        { ...blurVars(t.contentBlur, 0), duration: fade * 2, ease: "power2.out" },
+        {
+          ...blurVars(t.contentBlur, 0),
+          duration: fade * 2,
+          ease: "power2.out",
+        },
         0,
       );
     }
@@ -171,7 +175,11 @@ export function buildFadeEnter(
     tl.to(els.content, { opacity: 1, duration: d, ease: "none" }, 0);
   }
   if (els.backdrop) {
-    tl.to(els.backdrop, { autoAlpha: t.backdropOpacity, duration: d, ease: "none" }, 0);
+    tl.to(
+      els.backdrop,
+      { autoAlpha: t.backdropOpacity, duration: d, ease: "none" },
+      0,
+    );
   }
   return tl;
 }

@@ -5,7 +5,11 @@
 
 import { animatePersistPair } from "../flight";
 import { readSnapshotCore } from "../measure";
-import type { PersistAdapter, PersistSnapshot, PersistVisualLayer } from "../types";
+import type {
+  PersistAdapter,
+  PersistSnapshot,
+  PersistVisualLayer,
+} from "../types";
 import { createFrame, lockInner } from "./shared";
 
 export const canvasAdapter: PersistAdapter = {

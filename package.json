@@ -2,19 +2,36 @@
   "name": "deltached-workspace",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "pnpm --filter docs dev",
     "dev:lib": "pnpm --filter deltached dev",
     "build": "pnpm --filter deltached build && pnpm --filter docs build",
     "build:lib": "pnpm --filter deltached build",
     "changeset": "changeset",
-    "version": "changeset version",
-    "release": "pnpm build:lib && changeset publish"
+    "changeset:status": "changeset status",
+    "version:packages": "changeset version",
+    "release:check": "node scripts/check-release.mjs && pnpm --filter deltached typecheck && pnpm build:lib",
+    "release": "pnpm release:check && changeset publish",
+    "format": "prettier --write \"packages/deltached/**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"packages/deltached/**/*.{ts,json,md}\"",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.31.0"
+    "@changesets/cli": "^2.31.0",
+    "@playwright/test": "^1.49.0",
+    "gsap": "^3.15.0",
+    "prettier": "^3.4.2",
+    "vite": "^7.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "sharp"]
+    "onlyBuiltDependencies": ["esbuild", "sharp"],
+    "overrides": {
+      "esbuild": ">=0.28.1"
+    }
   }
 }

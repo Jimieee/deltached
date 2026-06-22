@@ -6,6 +6,37 @@ import type { PersistConfig } from "../persist/types";
 
 export type TransitionPhase = "idle" | "entering" | "open" | "leaving";
 
+/**
+ * Where the target settles when it opens.
+ *
+ * - `"center"` (default): the target rests wherever its OWN CSS lays it out —
+ *   e.g. a flex/grid-centered overlay. Deltached only measures that frame and
+ *   morphs the source into it, then hands every inline style back to CSS on
+ *   settle. This is the historical behavior; nothing is left positioning the
+ *   element afterwards.
+ * - origin family (`"origin"`, `"origin-top"`, `"origin-bottom"`,
+ *   `"origin-left"`, `"origin-right"`, `"origin-auto"`): the target keeps its
+ *   natural SIZE and appearance (still CSS-owned) but is positioned relative to
+ *   the source it morphs from, so it visually grows out of the trigger.
+ *   `"origin"` grows evenly from the source's center; the directional variants
+ *   grow toward that side (e.g. `"origin-bottom"` is a dropdown that grows down,
+ *   staying centered on the cross axis); `"origin-auto"` is a vertical dropdown
+ *   that anchors to the top/bottom edge and flips up/down toward the side with
+ *   more room, live as the viewport changes. The resting
+ *   frame is computed from the live source rect and the viewport — at open time
+ *   and again on every viewport change — then kept as inline positioning while
+ *   open, since CSS cannot reproduce a runtime, per-trigger, viewport-clamped
+ *   position. See `placementMargin` for the viewport gutter.
+ */
+export type Placement =
+  | "center"
+  | "origin"
+  | "origin-top"
+  | "origin-bottom"
+  | "origin-left"
+  | "origin-right"
+  | "origin-auto";
+
 export interface Rect {
   x: number;
   y: number;
@@ -97,9 +128,25 @@ export interface DeltachedConfig {
    * Omit or pass `false` to disable; the core behaves exactly as before.
    */
   persist?: PersistConfig | false;
+  /**
+   * Default resting placement for the target (see {@link Placement}).
+   * Overridable per call via `enter({ placement })`. Defaults to `"center"`,
+   * which leaves positioning entirely to CSS.
+   */
+  placement?: Placement;
+  /**
+   * Viewport gutter (px) kept on every edge when an `"origin"`-placed target
+   * is clamped on screen. Ignored for `"center"`. Defaults to `16`.
+   */
+  placementMargin?: number;
 }
 
 export interface EnterOptions {
   /** Origin element for this transition; falls back to config.source. */
   from?: HTMLElement;
+  /**
+   * Resting placement for THIS transition (see {@link Placement}). Overrides
+   * `config.placement`. Falls back to it when omitted.
+   */
+  placement?: Placement;
 }

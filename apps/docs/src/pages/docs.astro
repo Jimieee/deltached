@@ -1,0 +1,795 @@
+---
+import Callout from "../components/docs/Callout.astro";
+import CodeBlock from "../components/docs/CodeBlock.astro";
+import CodeGroup from "../components/docs/CodeGroup.astro";
+import PropsTable from "../components/docs/PropsTable.astro";
+import { install, quickStart, quickStartHtml } from "../data/docs-snippets";
+import Base from "../layouts/Base.astro";
+import { withBase } from "../config/nav";
+
+/** In-page navbar references — one per top-level section below. */
+const references = [
+  { label: "Overview", href: "#overview" },
+  { label: "Install", href: "#install" },
+  { label: "Quick start", href: "#quick-start" },
+  { label: "Concepts", href: "#concepts" },
+  { label: "Placement", href: "#placement" },
+  { label: "Timings", href: "#timings" },
+  { label: "Persist", href: "#persist" },
+  { label: "Accessibility", href: "#accessibility" },
+  { label: "API", href: "#api" },
+];
+
+const placementRows = [
+  {
+    name: '"center"',
+    type: "CSS-owned",
+    description:
+      "The target rests wherever its own CSS lays it out (a flex- or grid-centered overlay, say). deltached morphs into that frame, then hands <strong>all</strong> positioning back to CSS on settle. The default.",
+  },
+  {
+    name: '"origin"',
+    type: "grows from center",
+    description:
+      "Keeps the target's natural size, but positions it over the source so it grows evenly out of the trigger's center.",
+  },
+  {
+    name: '"origin-top"',
+    type: "grows ↑",
+    description: "Anchored to the source, expanding upward, centered across.",
+  },
+  {
+    name: '"origin-bottom"',
+    type: "grows ↓",
+    description:
+      "A dropdown: anchored to the source, expanding down, centered on the cross axis.",
+  },
+  {
+    name: '"origin-left"',
+    type: "grows ←",
+    description: "Anchored to the source's trailing edge, expanding left.",
+  },
+  {
+    name: '"origin-right"',
+    type: "grows →",
+    description: "Anchored to the source's leading edge, expanding right.",
+  },
+  {
+    name: '"origin-auto"',
+    type: "flip-aware ↕",
+    description:
+      "A smart dropdown: anchors to the source's top or bottom edge and grows toward whichever side has more room, flipping live as the viewport changes. The cross axis leans away from the nearer edge.",
+  },
+];
+
+const configRows = [
+  {
+    name: "target",
+    type: "HTMLElement",
+    required: true,
+    description:
+      "The destination — and the surface that actually morphs. deltached measures its natural (open) frame and animates that same box from the source's frame.",
+  },
+  {
+    name: "source",
+    type: "HTMLElement | null",
+    default: "null",
+    description:
+      "Default origin element. Override per call with <code>enter({ from })</code>; one of the two must resolve to a connected element or <code>enter()</code> warns and bails.",
+  },
+  {
+    name: "backdrop",
+    type: "HTMLElement | null",
+    default: "null",
+    description:
+      "An element faded in and out in sync with the morph (a dimmed overlay). Its opacity is driven for you.",
+  },
+  {
+    name: "content",
+    type: "HTMLElement[] | (() => HTMLElement[])",
+    default: "target children",
+    description:
+      "Elements crossfaded inside the target while it morphs. Resolved fresh on each transition; defaults to the target's direct children.",
+  },
+  {
+    name: "placement",
+    type: "Placement",
+    default: '"center"',
+    description:
+      "Where the target settles. <code>\"center\"</code> leaves it to your CSS; the <code>origin</code> family anchors it to the source. See <a href='#placement'>Placement</a>.",
+  },
+  {
+    name: "placementMargin",
+    type: "number",
+    default: "16",
+    description:
+      "Viewport gutter (px) kept on every edge when an origin-placed panel is clamped on screen. Ignored for <code>center</code>.",
+  },
+  {
+    name: "timings",
+    type: "Partial&lt;DeltachedTimings&gt;",
+    default: "{}",
+    description:
+      "Per-instance overrides for durations, eases, blur and backdrop. See <a href='#timings'>Timings</a>.",
+  },
+  {
+    name: "hooks",
+    type: "DeltachedHooks",
+    default: "{}",
+    description:
+      "Lifecycle callbacks for everything the core doesn't own — visibility, scroll lock, focus, mounting.",
+  },
+  {
+    name: "persist",
+    type: "PersistConfig | false",
+    default: "false",
+    description:
+      "Opt in to shared-element continuity for marked descendants. Pass <code>{}</code> for defaults; omit or pass <code>false</code> to disable. See <a href='#persist'>Persist</a>.",
+  },
+];
+
+const methodRows = [
+  {
+    name: "enter(options?)",
+    type: "=&gt; Promise&lt;boolean&gt;",
+    description:
+      "Morphs the target in from the source. Resolves <code>true</code> when it settles, <code>false</code> if skipped or interrupted. A no-op while already <code>open</code> or <code>entering</code>. <code>options</code>: <code>{ from?, placement? }</code>.",
+  },
+  {
+    name: "leave()",
+    type: "=&gt; Promise&lt;boolean&gt;",
+    description:
+      "Morphs the target back onto the last source. The source only reappears during the final handoff window — never before the transition ends.",
+  },
+  {
+    name: "destroy()",
+    type: "=&gt; void",
+    description:
+      "Kills any running animation, reverts every inline style the system touched, and detaches its listeners. Call it on unmount.",
+  },
+  {
+    name: "phase",
+    type: "TransitionPhase",
+    description:
+      "Read-only. One of <code>\"idle\"</code>, <code>\"entering\"</code>, <code>\"open\"</code>, <code>\"leaving\"</code>.",
+  },
+  {
+    name: "isOpen / isAnimating / isIdle",
+    type: "boolean",
+    description:
+      "Read-only convenience getters derived from <code>phase</code>.",
+  },
+];
+
+const persistRows = [
+  {
+    name: "attribute",
+    type: "string",
+    default: '"data-deltached-id"',
+    description:
+      "The attribute whose value is the match key. An element on the source and one on the target sharing the same value form a pair.",
+  },
+  {
+    name: "enabled",
+    type: "boolean",
+    default: "true",
+    description: "<code>false</code> behaves exactly like omitting <code>persist</code> altogether.",
+  },
+  {
+    name: "overflow",
+    type: '"clip-to-surface" | "allow"',
+    default: '"clip-to-surface"',
+    description:
+      "Clip the flying layers to the morphing surface's animated silhouette (so they read as its content), or let them overflow it.",
+  },
+  {
+    name: "handoff",
+    type: "PersistHandoffConfig",
+    default: "{}",
+    description:
+      "Tunes the central dual-snapshot crossfade: <code>enabled</code>, <code>at</code>, <code>window</code>, <code>easing</code>. The strong change is hidden mid-travel, never as a late cut.",
+  },
+  {
+    name: "adapters",
+    type: "Partial&lt;Record&lt;PersistKind, PersistAdapter&gt;&gt;",
+    default: "built-ins",
+    description:
+      "Override or extend the per-kind handlers — <code>text</code>, <code>image</code>, <code>canvas</code>, <code>surface</code>, <code>custom</code>. Bring a custom adapter for exotic content.",
+  },
+  {
+    name: "classify",
+    type: "(el: HTMLElement) =&gt; PersistKind",
+    default: "defaultClassify",
+    description: "Override how an element's kind is decided during the read phase.",
+  },
+  {
+    name: "zIndex",
+    type: "number",
+    default: "9999",
+    description: "z-index of the temporary overlay the layers fly inside.",
+  },
+  {
+    name: "debug",
+    type: "boolean",
+    default: "false",
+    description:
+      "Dev diagnostics via <code>console.warn</code> (duplicate ids, adapter fallbacks, unusable snapshots). Keep off in production.",
+  },
+];
+
+const timingRows = [
+  {
+    name: "enterDuration",
+    type: "number",
+    default: "0.6",
+    description: "Seconds for the enter morph.",
+  },
+  {
+    name: "leaveDuration",
+    type: "number",
+    default: "0.6",
+    description: "Seconds for the leave morph.",
+  },
+  {
+    name: "enterEase",
+    type: "string",
+    default: '"deltached.enter"',
+    description:
+      "GSAP ease for entering. A snappy take-off with a soft landing, registered for you.",
+  },
+  {
+    name: "leaveEase",
+    type: "string",
+    default: '"deltached.leave"',
+    description: "GSAP ease for leaving — a touch tighter, so exits feel faster.",
+  },
+  {
+    name: "contentFadeFraction",
+    type: "number",
+    default: "0.3",
+    description: "Fraction of the duration spent fading the target's content in/out.",
+  },
+  {
+    name: "handoffFraction",
+    type: "number",
+    default: "0.3",
+    description:
+      "Final fraction of the leave where the source fades back in under the surface — what prevents it flashing before the morph ends.",
+  },
+  {
+    name: "backdropFadeFraction",
+    type: "number",
+    default: "0.55",
+    description: "Fraction of the duration used for the backdrop fade.",
+  },
+  {
+    name: "backdropOpacity",
+    type: "number",
+    default: "0.2",
+    description: "Backdrop opacity while open.",
+  },
+  {
+    name: "contentBlur",
+    type: "number",
+    default: "12",
+    description:
+      "Max blur (px) applied to content mid-morph. <code>0</code> disables the filter entirely.",
+  },
+  {
+    name: "reducedMotionDuration",
+    type: "number",
+    default: "0.15",
+    description: "Plain-fade duration used when the user prefers reduced motion.",
+  },
+];
+---
+
+<Base
+  title="deltached — docs"
+  description="How to use deltached: an interruptible, shared-element morph controller for the web."
+  references={references}
+>
+  <main class="page">
+    <header class="intro">
+      <p class="eyebrow">Documentation</p>
+      <h1>Morph any box into any other box.</h1>
+      <p class="lead">
+        deltached is a small, framework-agnostic controller for shared-element
+        transitions. Hand it two elements — a source and a target — and it
+        animates one growing into the other, plays it back in reverse on close,
+        survives interruption, and carries marked children between the two
+        layouts. Everything visual stays yours; deltached only measures and
+        animates.
+      </p>
+    </header>
+
+    {/* ---- Overview -------------------------------------------------- */}
+    <section id="overview" class="sec">
+      <h2>Overview</h2>
+      <p>
+        It helps to drop the word "modal". deltached doesn't render dialogs,
+        dropdowns, or lightboxes — it morphs a box into a box. That single
+        primitive composes into all of them, and it nests: a trigger can live
+        inside a panel that itself grew from another trigger.
+      </p>
+
+      <p>The pieces you wire up:</p>
+      <ul class="terms">
+        <li>
+          <strong>source</strong> — any element the target should grow out of (a
+          button, a card, a form field).
+        </li>
+        <li>
+          <strong>target</strong> — the destination, and the surface that
+          actually morphs. deltached pins it out of flow and animates its real
+          box (translate + width/height, <em>never</em> scale), so border-radius
+          and proportions hold at every frame.
+        </li>
+        <li>
+          <strong>content</strong> — the children inside the target, crossfaded
+          (and softly blurred) while the surface travels.
+        </li>
+        <li>
+          <strong>backdrop</strong> — an optional overlay faded in sync.
+        </li>
+        <li>
+          <strong>persisted children</strong> — descendants present in both the
+          source and the target that fly between the two layouts as their own
+          layer instead of crossfading. <a href="#persist">More below.</a>
+        </li>
+      </ul>
+
+      <p>
+        Every pattern in these docs is demonstrated live — buttons into forms,
+        fields into selects, cards into fullscreen, thumbnails into a lightbox,
+        toolbar buttons into directional menus — on the <a href={withBase("/examples")}
+          >examples page</a
+        >.
+      </p>
+
+      <Callout kind="note" title="Requirements">
+        deltached drives its timeline with <a
+          href="https://gsap.com"
+          target="_blank"
+          rel="noreferrer">GSAP</a
+        >, declared as a <code>peerDependency</code> — install it alongside.
+        Every API is SSR-safe: it no-ops outside the browser and reads
+        <code>prefers-reduced-motion</code> at runtime.
+      </Callout>
+    </section>
+
+    {/* ---- Install --------------------------------------------------- */}
+    <section id="install" class="sec">
+      <h2>Installation</h2>
+      <p>
+        Install the package and its GSAP peer with your package manager of
+        choice.
+      </p>
+      <CodeGroup tabs={install} id="install" />
+    </section>
+
+    {/* ---- Quick start ---------------------------------------------- */}
+    <section id="quick-start" class="sec">
+      <h2>Quick start</h2>
+      <p>
+        Two elements and three calls: construct a transition, drive it on click,
+        and tear it down when the component unmounts. The markup is the same
+        everywhere — the target just starts <code>hidden</code> so it can be
+        measured at rest before it ever paints.
+      </p>
+
+      <CodeBlock code={quickStartHtml} lang="html" title="index.html" />
+
+      <CodeGroup tabs={quickStart} id="quick-start" />
+
+      <Callout kind="tip" title="Why the hooks?">
+        deltached owns animation and visibility, nothing else. The target has to
+        be in the DOM and measurable when the read phase runs, so you reveal it
+        in <code>beforeEnter</code> and hide it again in <code>afterLeave</code>.
+        That's also where scroll-locking, focus, and mounting belong.
+      </Callout>
+    </section>
+
+    {/* ---- Concepts -------------------------------------------------- */}
+    <section id="concepts" class="sec">
+      <h2>Core concepts</h2>
+
+      <h3>The target is the surface</h3>
+      <p>
+        There's no extra "ghost" element. deltached takes the target out of flow
+        (<code>position: fixed</code>), shapes it exactly like the source, and
+        animates that one box to the target's natural frame. Because both
+        endpoints live in the same property space — x, y, width, height — an
+        interrupted transition simply retweens from wherever it is. Rapid
+        open/close never tears the DOM.
+      </p>
+
+      <h3>Lifecycle &amp; hooks</h3>
+      <p>
+        A transition moves through four phases, readable any time via
+        <code>transition.phase</code>:
+      </p>
+      <p class="phases">
+        <code>idle</code> <span aria-hidden="true">→</span>
+        <code>entering</code> <span aria-hidden="true">→</span>
+        <code>open</code> <span aria-hidden="true">→</span>
+        <code>leaving</code> <span aria-hidden="true">→</span>
+        <code>idle</code>
+      </p>
+      <p>Hooks fire at the edges, so you can do the work the core leaves to you:</p>
+      <ul class="terms">
+        <li>
+          <strong>beforeEnter</strong> — before any measurement. Make the
+          target's container visible here.
+        </li>
+        <li><strong>afterEnter</strong> — once the enter has fully settled (focus the panel).</li>
+        <li><strong>beforeLeave</strong> — right before the leave starts.</li>
+        <li>
+          <strong>afterLeave</strong> — after the target is reset, same
+          synchronous frame, so nothing intermediate paints. Hide or unmount
+          here.
+        </li>
+      </ul>
+
+      <h3>Interruptibility</h3>
+      <p>
+        Calling <code>leave()</code> mid-enter (or <code>enter()</code> mid-leave)
+        doesn't restart — it reverses from the current frame, and any persisted
+        layers ride home with it. You can spam the trigger and it stays glued
+        together. <code>enter()</code> resolves <code>false</code> when a newer
+        call supersedes it, which is handy for awaiting a settled state.
+      </p>
+    </section>
+
+    {/* ---- Placement ------------------------------------------------- */}
+    <section id="placement" class="sec">
+      <h2>Placement</h2>
+      <p>
+        Placement decides where the target comes to rest. With the default
+        <code>"center"</code>, deltached morphs into whatever frame your CSS
+        produces and then steps out of the way. The <code>origin</code> family
+        instead keeps the target's natural size but anchors it to the source, so
+        it visibly grows out of the trigger — a dropdown, a popover, a menu.
+      </p>
+
+      <PropsTable rows={placementRows} />
+
+      <p>
+        Set a default on the instance, or choose per call. Origin panels are
+        clamped to stay <code>placementMargin</code> px clear of every viewport
+        edge, and re-anchor live as the window resizes.
+      </p>
+
+      <CodeBlock
+        lang="ts"
+        title="dropdown.ts"
+        code={`import { createDeltachedTransition } from "deltached";
+
+const dropdown = createDeltachedTransition({
+  target: menu,
+  source: button,
+  placement: "origin-bottom", // grow straight down from the trigger
+  placementMargin: 12,        // keep 12px clear of every viewport edge
+});
+
+// …or decide the direction per open — here, a flip-aware dropdown:
+button.addEventListener("click", () =>
+  dropdown.enter({ from: button, placement: "origin-auto" }),
+);`}
+      />
+
+      <Callout kind="caution" title="Nesting origin panels">
+        An open origin-placed panel keeps an inline <code>transform</code> so it
+        can hold its runtime position. That makes it the containing block for any
+        <code>position: fixed</code> descendant — including a nested popover's
+        own morph — and would desync it. Keep a panel that <em>hosts</em> nested
+        morphs on <code>"center"</code> placement; centered panels carry no
+        transform, so the inner fixed surface stays viewport-anchored.
+      </Callout>
+    </section>
+
+    {/* ---- Timings --------------------------------------------------- */}
+    <section id="timings" class="sec">
+      <h2>Timings</h2>
+      <p>
+        The defaults are tuned for a soft dialog. Override any subset through
+        <code>timings</code> — the rest fall back to the defaults below. Fades
+        and the backdrop are expressed as <em>fractions of the duration</em>, so
+        they scale with whatever speed you pick.
+      </p>
+
+      <CodeBlock
+        lang="ts"
+        title="presets.ts"
+        code={`// A crisp popover — fast, no content blur, no backdrop dim:
+createDeltachedTransition({
+  target: popover,
+  source: field,
+  placement: "origin-auto",
+  timings: {
+    enterDuration: 0.34,
+    leaveDuration: 0.24,
+    contentBlur: 0,
+    backdropOpacity: 0,
+  },
+});
+
+// A heavier dialog — slower, with a frosted crossfade and a dim backdrop:
+createDeltachedTransition({
+  target: dialog,
+  source: trigger,
+  backdrop,
+  timings: { enterDuration: 0.6, contentBlur: 12, backdropOpacity: 0.2 },
+});`}
+      />
+
+      <PropsTable rows={timingRows} />
+    </section>
+
+    {/* ---- Persist --------------------------------------------------- */}
+    <section id="persist" class="sec">
+      <h2>Persisted children</h2>
+      <p>
+        Sometimes a piece of content exists on <em>both</em> sides of the morph —
+        a thumbnail that's also the lightbox's hero, a label that's also the
+        panel's title. Mark those elements with the same
+        <code>data-deltached-id</code> on the source and the target, opt in with
+        <code>persist</code>, and they fly between layouts as their own layer
+        (image, text, canvas, or a cloned surface) instead of crossfading with
+        everything else.
+      </p>
+
+      <CodeBlock
+        lang="html"
+        title="gallery.html"
+        code={`<!-- source: a card -->
+<button id="card">
+  <img data-deltached-id="cover" src="/thumb.jpg" alt="" />
+  <span data-deltached-id="title">Sunset over the bay</span>
+</button>
+
+<!-- target: the lightbox it opens into -->
+<div id="lightbox" hidden>
+  <img data-deltached-id="cover" src="/full.jpg" alt="" />
+  <h2 data-deltached-id="title">Sunset over the bay</h2>
+</div>`}
+      />
+
+      <CodeBlock
+        lang="ts"
+        title="lightbox.ts"
+        code={`createDeltachedTransition({
+  target: lightbox,
+  source: card,
+  // Matching ids fly as their own layer; everything else still crossfades.
+  // Enable with defaults — tune the handoff/overflow/adapters when you need to.
+  persist: {},
+});`}
+      />
+
+      <Callout kind="note">
+        Ids only need to match <em>within a pair</em> (source ↔ target). A modal
+        with no matching ids pays nothing — behavior is identical to leaving
+        <code>persist</code> off. For exotic content (video, an iframe, a
+        stateful widget) supply a custom adapter rather than expecting a perfect
+        clone.
+      </Callout>
+    </section>
+
+    {/* ---- Accessibility -------------------------------------------- */}
+    <section id="accessibility" class="sec">
+      <h2>Accessibility &amp; motion</h2>
+      <p>
+        deltached respects <code>prefers-reduced-motion</code> automatically: it
+        skips the morph and plays a short crossfade instead, keeping the exact
+        same lifecycle and hooks (an origin panel still opens at the source). The
+        roles your UI needs — <code>role="dialog"</code>, focus management,
+        scroll lock, Escape, restore-focus — are yours to add in the hooks, since
+        only you know whether the surface is a dialog, a menu, or a popover.
+      </p>
+
+      <p>
+        While it hands a source off to the surface, deltached toggles that
+        element's opacity and visibility and marks it with
+        <code>data-deltached-morphing</code>. Suppress your own transitions on
+        that attribute so a trigger doesn't fade on its own each time it
+        disappears and reappears around the morph:
+      </p>
+
+      <CodeBlock
+        lang="css"
+        title="trigger.css"
+        code={`/* Stand down while deltached drives the handoff. */
+[data-deltached-morphing] {
+  transition: none;
+}`}
+      />
+    </section>
+
+    {/* ---- API ------------------------------------------------------- */}
+    <section id="api" class="sec">
+      <h2>API reference</h2>
+
+      <p>
+        The entry point is <code>createDeltachedTransition(config)</code> (or
+        <code>new DeltachedTransition(config)</code> — identical). It returns a
+        controller you keep for the element's lifetime.
+      </p>
+
+      <h3>DeltachedConfig</h3>
+      <PropsTable rows={configRows} />
+
+      <h3>Instance methods &amp; getters</h3>
+      <PropsTable rows={methodRows} />
+
+      <h3>DeltachedTimings</h3>
+      <PropsTable rows={timingRows} />
+
+      <h3>PersistConfig</h3>
+      <p>
+        Every field is optional — <code>persist: {"{}"}</code> enables the
+        feature with the defaults below. Pass <code>false</code> (or omit it) to
+        turn it off.
+      </p>
+      <PropsTable rows={persistRows} />
+
+      <h3>Also exported</h3>
+      <p>
+        Constants and helpers for advanced use: <code>DEFAULT_TIMINGS</code>,
+        <code>ENTER_CURVE</code> / <code>LEAVE_CURVE</code> and
+        <code>registerEase</code>, <code>DEFAULT_PLACEMENT</code> /
+        <code>DEFAULT_PLACEMENT_MARGIN</code>, <code>MORPHING_ATTRIBUTE</code>,
+        <code>prefersReducedMotion</code>, the persist primitives
+        (<code>builtinPersistAdapters</code>, <code>defaultClassify</code>,
+        <code>DEFAULT_PERSIST_ATTRIBUTE</code>), plus every type
+        (<code>Placement</code>, <code>EnterOptions</code>,
+        <code>DeltachedHooks</code>, <code>PersistConfig</code>…).
+      </p>
+    </section>
+  </main>
+</Base>
+
+<style>
+  /*
+   * Docs are a single reading column. The Apple-derived --ex-* accents from the
+   * examples page are mirrored here so the shared docs components (tables,
+   * callouts) speak the same palette site-wide.
+   */
+  .page {
+    --ex-accent: #0071e3;
+    --ex-sep: rgba(60, 60, 67, 0.12);
+
+    width: min(100%, 52rem);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
+  }
+
+  .intro {
+    max-width: 42rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.6rem;
+    color: var(--ex-accent);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.1rem, 5vw, 3rem);
+    font-weight: 680;
+    letter-spacing: -0.028em;
+    line-height: 1.04;
+  }
+
+  .lead {
+    margin: 1rem 0 0;
+    max-width: 40rem;
+    color: var(--muted);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+  }
+
+  /* Sections + scroll-margin so anchor jumps clear the fixed navbar. */
+  .sec {
+    scroll-margin-top: calc(var(--nav-size) + 1.5rem);
+  }
+
+  .sec + .sec {
+    margin-top: 3.5rem;
+  }
+
+  h2 {
+    margin: 0 0 0.85rem;
+    font-size: 1.6rem;
+    font-weight: 650;
+    letter-spacing: -0.024em;
+    line-height: 1.1;
+  }
+
+  h3 {
+    margin: 2rem 0 0.7rem;
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+  }
+
+  p {
+    margin: 0 0 1rem;
+    color: var(--fg-soft);
+    font-size: 0.975rem;
+    line-height: 1.62;
+    letter-spacing: -0.006em;
+  }
+
+  .lead {
+    color: var(--muted);
+  }
+
+  .terms {
+    margin: 0 0 1rem;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.5rem;
+    color: var(--fg-soft);
+    font-size: 0.975rem;
+    line-height: 1.55;
+  }
+
+  .terms li::marker {
+    color: var(--ex-accent);
+  }
+
+  strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  em {
+    font-style: italic;
+  }
+
+  a {
+    color: var(--ex-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+
+  /* Inline code in prose. */
+  p code,
+  .terms code,
+  li code {
+    padding: 0.08em 0.38em;
+    border-radius: var(--radius-xs);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    color: var(--fg);
+    font-family: "Geist Mono Variable", ui-monospace, monospace;
+    font-size: 0.85em;
+  }
+
+  .phases {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+  }
+
+  .phases span {
+    color: var(--ex-accent);
+  }
+
+  /* Spacing between stacked docs components. */
+  .sec :global(.cb),
+  .sec :global(.cg),
+  .sec :global(.pt),
+  .sec :global(.callout) {
+    margin: 1.25rem 0;
+  }
+</style>

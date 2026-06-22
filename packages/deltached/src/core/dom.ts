@@ -12,6 +12,15 @@ export function prefersReducedMotion(): boolean {
 }
 
 /**
+ * Current viewport size in CSS px. Matches the coordinate space of an element
+ * pinned at `position: fixed`, which is what the morph uses — so it's the right
+ * basis for clamping an origin-placed panel on screen.
+ */
+export function viewportSize(): { width: number; height: number } {
+  return { width: window.innerWidth, height: window.innerHeight };
+}
+
+/**
  * `will-change` is only valuable while the morph is running; keeping it
  * around wastes compositor memory, so it is always cleared on settle.
  */

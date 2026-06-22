@@ -1,0 +1,96 @@
+---
+/**
+ * A single syntax-highlighted code block with optional editor chrome.
+ *
+ * When `title` is set, a header bar shows the filename plus the copy button —
+ * the "editor" look used for component files. Without a title the block is bare
+ * code with a floating copy button, à la a terminal snippet. Highlighting runs
+ * at build time via Shiki (see `lib/shiki.ts`); the token surface is themed by
+ * the global `.dc-code` rules so this component only owns the frame.
+ */
+import { highlight, type CodeLang } from "../../lib/shiki";
+import CopyButton from "./CopyButton.astro";
+
+interface Props {
+  /** Source to render. Leading/trailing blank lines are trimmed. */
+  code: string;
+  /** Grammar id: `ts`, `tsx`, `vue`, `svelte`, `html`, `css`, `bash`… */
+  lang?: CodeLang;
+  /** Filename shown in the header bar; omit for a chromeless block. */
+  title?: string;
+}
+
+const { code, lang = "ts", title } = Astro.props;
+const html = await highlight(code, lang);
+---
+
+<div class:list={["cb", { "cb--titled": title }]}>
+  {
+    title && (
+      <div class="cb__bar">
+        <span class="cb__name">{title}</span>
+        <CopyButton text={code.replace(/^\n+|\n+$/g, "")} />
+      </div>
+    )
+  }
+
+  <div class="cb__code dc-code" set:html={html} />
+
+  {
+    !title && (
+      <span class="cb__float">
+        <CopyButton text={code.replace(/^\n+|\n+$/g, "")} />
+      </span>
+    )
+  }
+</div>
+
+<style>
+  .cb {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .cb__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--fg) 2.5%, var(--surface));
+  }
+
+  .cb__name {
+    color: var(--fg-soft);
+    font-family: "Geist Mono Variable", ui-monospace, monospace;
+    font-size: 0.78rem;
+    letter-spacing: -0.01em;
+  }
+
+  /* Chromeless block: copy floats over the code, revealed on hover/focus so it
+     never sits on top of the first line at rest. */
+  .cb__float {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    display: inline-flex;
+    opacity: 0;
+    transition: opacity var(--ease);
+  }
+
+  .cb:hover .cb__float,
+  .cb:focus-within .cb__float {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .cb__float {
+      opacity: 1;
+    }
+  }
+</style>

@@ -16,12 +16,16 @@ import {
   prefersReducedMotion,
   setWillChange,
   unmarkMorphing,
+  viewportSize,
 } from "./dom";
 import { measureGeometry } from "./measure";
 import {
-  PersistSession,
-  resolvePersistConfig,
-} from "../persist/session";
+  DEFAULT_PLACEMENT,
+  DEFAULT_PLACEMENT_MARGIN,
+  isOriginPlacement,
+  resolveOriginGeometry,
+} from "./placement";
+import { PersistSession, resolvePersistConfig } from "../persist/session";
 import type { ResolvedPersistConfig } from "../persist/types";
 import type {
   ElementGeometry,
@@ -29,6 +33,7 @@ import type {
   DeltachedConfig,
   DeltachedHooks,
   DeltachedTimings,
+  Placement,
   TransitionPhase,
 } from "./types";
 
@@ -77,6 +82,17 @@ const TARGET_RESET_PROPS =
   "position,top,left,right,bottom,margin,minWidth,minHeight,maxWidth,maxHeight," +
   "boxSizing,overflow,width,height,transform,opacity,visibility," +
   "borderRadius,backgroundColor,padding";
+/**
+ * Subset cleared when an `"origin"`-placed target settles open: everything in
+ * {@link TARGET_RESET_PROPS} EXCEPT the positioning channels
+ * (`position`/`top`/`left`/`transform`). Those stay inline so the panel holds
+ * the runtime resting frame CSS can't reproduce, while size, padding and
+ * overflow/max-height return to CSS so the open panel scrolls normally again.
+ */
+const ORIGIN_OPEN_RESET_PROPS =
+  "right,bottom,margin,minWidth,minHeight,maxWidth,maxHeight," +
+  "boxSizing,overflow,width,height,opacity,visibility," +
+  "borderRadius,backgroundColor,padding";
 const CONTENT_RESET_PROPS = "opacity,visibility,filter";
 
 /**
@@ -105,6 +121,8 @@ export class DeltachedTransition {
   private readonly hooks: DeltachedHooks;
   private readonly timings: DeltachedTimings;
   private readonly persistCfg: ResolvedPersistConfig | null;
+  private readonly placement: Placement;
+  private readonly placementMargin: number;
 
   private ctx: gsap.Context | null;
   private tl: gsap.core.Timeline | null = null;
@@ -112,6 +130,10 @@ export class DeltachedTransition {
   private source: HTMLElement | null = null;
   private naturalGeo: ElementGeometry | null = null;
   private pinned = false;
+  // Placement resolved for the in-flight transition; read by finishEnter to
+  // decide whether the open target keeps its anchored positioning or hands
+  // everything back to CSS. Set whenever a non-resumable enter measures.
+  private activePlacement: Placement = DEFAULT_PLACEMENT;
   private activeContent: HTMLElement[] = [];
   private persistSession: PersistSession | null = null;
   private settle: ((completed: boolean) => void) | null = null;
@@ -119,6 +141,18 @@ export class DeltachedTransition {
   // at schedule time and only fires if it's still current, so a transition
   // that re-claims the elements before the next frame keeps them marked.
   private morphGen = 0;
+  // Pending rAF id coalescing a burst of resize events into one re-anchor.
+  private reanchorRaf = 0;
+  // Re-anchors an open origin-placed panel against the live viewport. Bound
+  // once, attached to `resize` for the instance's lifetime, and a no-op unless
+  // an origin panel is actually open — see `reanchor()`.
+  private readonly onViewportChange = (): void => {
+    if (this.reanchorRaf) return;
+    this.reanchorRaf = requestAnimationFrame(() => {
+      this.reanchorRaf = 0;
+      this.reanchor();
+    });
+  };
 
   constructor(config: DeltachedConfig) {
     if (!config?.target) {
@@ -131,8 +165,18 @@ export class DeltachedTransition {
     this.hooks = config.hooks ?? {};
     this.timings = resolveTimings(config.timings);
     this.persistCfg = resolvePersistConfig(config.persist);
+    this.placement = config.placement ?? DEFAULT_PLACEMENT;
+    this.placementMargin = config.placementMargin ?? DEFAULT_PLACEMENT_MARGIN;
     // One context per instance collects every tween/setter for full revert.
     this.ctx = isBrowser ? gsap.context(() => {}) : null;
+    // Origin placement derives the panel's position from the live viewport, so
+    // it must follow viewport changes while open; the handler self-guards, so a
+    // never-origin instance pays only a passive, early-returning listener.
+    if (isBrowser) {
+      window.addEventListener("resize", this.onViewportChange, {
+        passive: true,
+      });
+    }
     ensureEases();
   }
 
@@ -169,6 +213,9 @@ export class DeltachedTransition {
       );
       return Promise.resolve(false);
     }
+    // Per-call placement overrides the instance default; resolved here so a
+    // resumed leave keeps whatever the original open used (it skips re-measure).
+    const placement = options.placement ?? this.placement;
 
     // Interrupted mid-leave with a pinned target: geometry is still valid and
     // the box is mid-morph, so skip setup and retween from current values.
@@ -213,7 +260,25 @@ export class DeltachedTransition {
           if (!resumable) {
             gsap.set(this.target, { autoAlpha: 0 });
             this.hooks.beforeEnter?.();
-            this.naturalGeo = measureGeometry(this.target);
+            const naturalGeo = measureGeometry(this.target);
+            if (isOriginPlacement(placement)) {
+              // Reduced motion skips the morph, but origin placement must still
+              // open the panel at the source instead of the CSS center: pin it
+              // at the resting frame so the plain fade reveals it there.
+              const restingGeo = resolveOriginGeometry(
+                placement,
+                measureGeometry(from),
+                naturalGeo,
+                viewportSize(),
+                this.placementMargin,
+              );
+              gsap.set(this.target, { ...PIN_VARS, ...frameVars(restingGeo) });
+              this.pinned = true;
+              this.naturalGeo = restingGeo;
+            } else {
+              this.naturalGeo = naturalGeo;
+            }
+            this.activePlacement = placement;
           }
           gsap.set(from, { autoAlpha: 0 });
           tl = buildFadeEnter(els, t);
@@ -225,7 +290,21 @@ export class DeltachedTransition {
 
           // Read phase: both measurements together, after the hook's writes.
           const sourceGeo = measureGeometry(from);
-          this.naturalGeo = measureGeometry(this.target);
+          const naturalGeo = measureGeometry(this.target);
+          // Origin placement rebases the resting frame onto the source (clamped
+          // to the viewport, read once here); center leaves the natural in-flow
+          // frame untouched. Either way naturalGeo is the open-end of the morph.
+          const restingGeo = isOriginPlacement(placement)
+            ? resolveOriginGeometry(
+                placement,
+                sourceGeo,
+                naturalGeo,
+                viewportSize(),
+                this.placementMargin,
+              )
+            : naturalGeo;
+          this.naturalGeo = restingGeo;
+          this.activePlacement = placement;
           // Persisted children, same read phase: the source's are still
           // visible (hidden below, in the write phase); the target's are
           // autoAlpha-hidden but laid out, so their rects are the final
@@ -234,6 +313,15 @@ export class DeltachedTransition {
             ? new PersistSession(this.persistCfg, t, "enter")
             : null;
           session?.capture(from, this.target);
+          if (isOriginPlacement(placement)) {
+            // The children were captured at the natural layout; shift their
+            // destinations by the same rigid translation that rebased the
+            // surface so the layers ride it instead of landing offset.
+            session?.translateTo(
+              restingGeo.rect.x - naturalGeo.rect.x,
+              restingGeo.rect.y - naturalGeo.rect.y,
+            );
+          }
 
           // Write phase: pin the target out of flow, shaped exactly like the
           // source, then swap visibility. Same synchronous frame — no flicker.
@@ -261,7 +349,12 @@ export class DeltachedTransition {
           setWillChange(this.target);
           tl = buildEnterTimeline(els, this.naturalGeo!, t);
           // Reverse the preserved layers back to the target with the surface.
-          this.persistSession?.retarget(tl, t.enterDuration, t.enterEase, "enter");
+          this.persistSession?.retarget(
+            tl,
+            t.enterDuration,
+            t.enterEase,
+            "enter",
+          );
         }
 
         tl.eventCallback("onComplete", () => this.finishEnter());
@@ -350,7 +443,12 @@ export class DeltachedTransition {
             // Resumed mid-enter: reverse the PRESERVED layers back to the
             // source so the persisted children ride home with the surface
             // instead of being dropped.
-            this.persistSession?.retarget(tl, t.leaveDuration, t.leaveEase, "leave");
+            this.persistSession?.retarget(
+              tl,
+              t.leaveDuration,
+              t.leaveEase,
+              "leave",
+            );
           } else {
             session?.attach(tl, t.leaveDuration, t.leaveEase);
             this.persistSession = session;
@@ -368,7 +466,12 @@ export class DeltachedTransition {
     this.cancelActive();
     this.ctx?.revert();
     this.ctx = null;
-    if (isBrowser) clearWillChange(this.target);
+    if (isBrowser) {
+      clearWillChange(this.target);
+      window.removeEventListener("resize", this.onViewportChange);
+      if (this.reanchorRaf) cancelAnimationFrame(this.reanchorRaf);
+      this.reanchorRaf = 0;
+    }
     // Invalidate any pending deferred unmark, then drop the attribute now.
     this.morphGen++;
     unmarkMorphing(this.target);
@@ -380,16 +483,65 @@ export class DeltachedTransition {
     this.phaseValue = "idle";
   }
 
+  /**
+   * Recomputes an open origin-placed panel's resting position against the
+   * CURRENT viewport and source location, then re-applies it. The position is
+   * a runtime, viewport-derived value CSS can't hold, so without this the panel
+   * would freeze at its open-time coordinates and drift off-screen as the
+   * window resizes. The SIZE stays CSS-owned (already responsive) — only x/y
+   * move — and naturalGeo is updated so a later leave morphs home from the
+   * frame actually on screen. No-op unless an origin panel is currently open.
+   */
+  private reanchor(): void {
+    if (
+      this.phaseValue !== "open" ||
+      !isOriginPlacement(this.activePlacement) ||
+      !this.naturalGeo ||
+      !this.source?.isConnected
+    ) {
+      return;
+    }
+    const sourceGeo = measureGeometry(this.source);
+    // The panel's live box: width/height are the current CSS-driven size
+    // (transforms don't scale them); only its position needs recomputing.
+    const r = this.target.getBoundingClientRect();
+    const sizeGeo: ElementGeometry = {
+      ...this.naturalGeo,
+      rect: { x: r.left, y: r.top, width: r.width, height: r.height },
+    };
+    const anchored = resolveOriginGeometry(
+      this.activePlacement,
+      sourceGeo,
+      sizeGeo,
+      viewportSize(),
+      this.placementMargin,
+    );
+    this.naturalGeo = anchored;
+    gsap.set(this.target, { x: anchored.rect.x, y: anchored.rect.y });
+  }
+
   private finishEnter(): void {
     // Layer → real handoff first, same synchronous frame as everything
     // below: the overlay disappears and the real persisted children become
     // visible together — no flash, and afterEnter() observes a clean DOM.
     this.persistSession?.teardown();
     this.persistSession = null;
-    // Un-pin: drop every morph-only inline style so CSS owns the open state.
-    // The element re-enters flow at its natural frame, so nothing jumps.
-    gsap.set(this.target, { clearProps: TARGET_RESET_PROPS });
-    this.pinned = false;
+    if (isOriginPlacement(this.activePlacement)) {
+      // Origin placement: the resting frame was computed from the source +
+      // viewport at open time, so CSS cannot reproduce it. Keep the
+      // positioning channels pinned inline and hand only size/appearance back
+      // to CSS, so the panel stays anchored while regaining its natural
+      // max-height/overflow (and thus internal scrolling) for the open state.
+      gsap.set(this.target, { clearProps: ORIGIN_OPEN_RESET_PROPS });
+      // Still pinned (position/transform live on the element); a later leave
+      // re-measures and re-pins from here, so this stays accurate.
+      this.pinned = true;
+    } else {
+      // Un-pin: drop every morph-only inline style so CSS owns the open state.
+      // The element re-enters flow at its natural frame, so nothing jumps.
+      gsap.set(this.target, { clearProps: TARGET_RESET_PROPS });
+      this.pinned = false;
+    }
     if (this.activeContent.length) {
       gsap.set(this.activeContent, { clearProps: CONTENT_RESET_PROPS });
     }

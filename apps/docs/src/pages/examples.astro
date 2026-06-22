@@ -8,9 +8,10 @@ import { references, sections } from "../examples/registry";
     <header class="intro">
       <h1>Examples</h1>
       <p>
-        Live demos of the deltached morph controller. Every card is a transition
-        source — click one to see the box travel into its panel and hand back on
-        close. Content is pulled from public mock APIs at build time.
+        Not a modal library — a morph controller. Every trigger is just a box
+        that grows into another box: a button into a form, a field into a custom
+        select, a card into a fullscreen takeover, a thumbnail into a lightbox.
+        The same controller drives all of them, and it nests.
       </p>
     </header>
 
@@ -18,30 +19,54 @@ import { references, sections } from "../examples/registry";
   </main>
 
   <style>
+    /*
+     * Examples-scoped design tokens, tuned to Apple's system palette so every
+     * section reads as one coherent surface: a single accent (system blue),
+     * the systemGray fills used for inset fields/groups, hairline separators,
+     * and a consistent radius scale. Defined here on the page root so the
+     * sections' global styles inherit them without leaking site-wide.
+     */
     .page {
+      --ex-accent: #0071e3;
+      --ex-accent-press: #0063c6;
+      --ex-fill: #f2f2f7; /* systemGray6 — filled fields, grouped rows */
+      --ex-fill-press: #e7e7ec;
+      --ex-sep: rgba(60, 60, 67, 0.12); /* separator */
+      --ex-label-2: #6e6e73; /* secondaryLabel */
+      --ex-label-3: #8e8e93; /* tertiaryLabel */
+      --ex-radius: 12px;
+      --ex-radius-lg: 18px;
+      --ex-radius-sm: 9px;
+      --ex-shadow:
+        0 16px 40px -12px rgba(0, 0, 0, 0.22),
+        0 0 0 0.5px rgba(0, 0, 0, 0.04);
+
       display: grid;
-      gap: 3.5rem;
-      width: min(100%, 64rem);
+      gap: 4rem;
+      width: min(100%, 60rem);
       margin: 0 auto;
-      padding: clamp(2rem, 6vh, 4rem) 1.25rem 6rem;
+      padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
     }
 
     .intro {
-      max-width: 44rem;
+      max-width: 40rem;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(2rem, 5vw, 2.75rem);
-      font-weight: 650;
-      letter-spacing: -0.03em;
+      font-size: clamp(2.1rem, 5vw, 2.9rem);
+      font-weight: 680;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
     }
 
     .intro p {
-      margin: 0.75rem 0 0;
-      color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.55;
+      margin: 0.85rem 0 0;
+      max-width: 36rem;
+      color: var(--ex-label-2);
+      font-size: 1.0625rem;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
     }
   </style>
 </Base>

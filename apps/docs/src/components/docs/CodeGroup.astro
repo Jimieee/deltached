@@ -1,0 +1,208 @@
+---
+/**
+ * A multi-language code block: one snippet per framework, switched by an
+ * Apple-style segmented control. The control follows the HIG segmented-control
+ * pattern — a single rounded track of equal-weight segments with a sliding
+ * selected indicator (driven by `code-tabs.ts`), used here exactly as a tab view
+ * over mutually exclusive variants of the same example.
+ *
+ * Each tab is highlighted at build time. Only the active panel is shown; the
+ * rest are `hidden` (kept in the DOM so switching is instant and copy-able).
+ */
+import { highlight, type CodeLang } from "../../lib/shiki";
+import CopyButton from "./CopyButton.astro";
+
+interface Tab {
+  /** Segment label, e.g. "React", "Vue", "Angular". */
+  label: string;
+  lang: CodeLang;
+  /** Optional filename shown above the code. */
+  title?: string;
+  code: string;
+}
+
+interface Props {
+  tabs: Tab[];
+  /** Stable id base for ARIA wiring; auto-generated when omitted. */
+  id?: string;
+}
+
+const { tabs, id } = Astro.props;
+const gid = id ?? `cg-${Math.random().toString(36).slice(2, 9)}`;
+
+const rendered = await Promise.all(
+  tabs.map(async (tab) => ({
+    ...tab,
+    html: await highlight(tab.code, tab.lang),
+    clean: tab.code.replace(/^\n+|\n+$/g, ""),
+  })),
+);
+---
+
+<div class="cg" data-code-group>
+  <div class="cg__seg" role="tablist" aria-label="Code language" data-cg-seg>
+    <span class="cg__pill" data-cg-pill aria-hidden="true"></span>
+    {
+      rendered.map((tab, i) => (
+        <button
+          class="cg__tab"
+          type="button"
+          role="tab"
+          id={`${gid}-tab-${i}`}
+          aria-controls={`${gid}-panel-${i}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? "0" : "-1"}
+          data-cg-tab={i}
+        >
+          {tab.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="cg__panels">
+    {
+      rendered.map((tab, i) => (
+        <div
+          class="cg__panel"
+          role="tabpanel"
+          id={`${gid}-panel-${i}`}
+          aria-labelledby={`${gid}-tab-${i}`}
+          tabindex="0"
+          data-cg-panel={i}
+          hidden={i !== 0}
+        >
+          {tab.title && <span class="cg__name">{tab.title}</span>}
+          <div class="cg__code dc-code" set:html={tab.html} />
+          <span class="cg__copy">
+            <CopyButton text={tab.clean} />
+          </span>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .cg {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  /* ---- Segmented control (HIG) -------------------------------------- */
+  .cg__seg {
+    position: relative;
+    display: flex;
+    gap: 0.1rem;
+    margin: 0;
+    padding: 0.25rem;
+
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--fg) 2.5%, var(--surface));
+  }
+
+  /* The sliding selection. Position/width are set inline by code-tabs.ts and
+     animated with the emphasis curve — the indicator glides between segments. */
+  .cg__pill {
+    position: absolute;
+    top: 0.25rem;
+    left: 0;
+    height: calc(100% - 0.5rem);
+    width: 0;
+
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+    transform: translateX(0);
+    transition:
+      transform var(--ease-emphasis),
+      width var(--ease-emphasis);
+    pointer-events: none;
+  }
+
+  /* Until JS positions the pill, fall back to a CSS-only highlight on the
+     selected tab so a no-JS / pre-hydration view still reads correctly. */
+  .cg:not([data-cg-ready]) .cg__tab[aria-selected="true"] {
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cg__tab {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0;
+
+    padding: 0.4rem 0.7rem;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--muted);
+
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: -0.006em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--ease);
+  }
+
+  .cg__tab:hover {
+    color: var(--fg-soft);
+  }
+
+  .cg__tab[aria-selected="true"] {
+    color: var(--fg);
+    font-weight: 560;
+  }
+
+  .cg__tab:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--fg) 45%, transparent);
+  }
+
+  /* ---- Panels ------------------------------------------------------- */
+  .cg__panel {
+    position: relative;
+  }
+
+  .cg__panel[hidden] {
+    display: none;
+  }
+
+  .cg__panel:focus-visible {
+    outline: none;
+  }
+
+  .cg__name {
+    display: block;
+    padding: 0.6rem 1.1rem 0;
+    color: var(--fg-soft);
+    font-family: "Geist Mono Variable", ui-monospace, monospace;
+    font-size: 0.78rem;
+    letter-spacing: -0.01em;
+  }
+
+  .cg__copy {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    display: inline-flex;
+    opacity: 0;
+    transition: opacity var(--ease);
+  }
+
+  .cg__panel:hover .cg__copy,
+  .cg__panel:focus-within .cg__copy {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .cg__copy {
+      opacity: 1;
+    }
+  }
+</style>

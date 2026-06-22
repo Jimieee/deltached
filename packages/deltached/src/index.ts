@@ -10,16 +10,14 @@ export {
   LEAVE_EASE,
   registerEase,
 } from "./core/config";
+export { DEFAULT_PLACEMENT, DEFAULT_PLACEMENT_MARGIN } from "./core/placement";
 export { MORPHING_ATTRIBUTE, prefersReducedMotion } from "./core/dom";
 export {
   animatePersistPair,
   persistFrameVars,
   type PersistFlightOptions,
 } from "./persist/flight";
-export {
-  builtinPersistAdapters,
-  defaultClassify,
-} from "./persist/adapters";
+export { builtinPersistAdapters, defaultClassify } from "./persist/adapters";
 export { DEFAULT_PERSIST_ATTRIBUTE } from "./persist/types";
 export type {
   PersistAdapter,
@@ -42,6 +40,7 @@ export type {
 export type {
   ElementGeometry,
   EnterOptions,
+  Placement,
   Rect,
   DeltachedConfig,
   DeltachedHooks,

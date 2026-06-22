@@ -1,8 +1,11 @@
+import { initCodeTabs } from "./code-tabs";
 import { initCopyButtons } from "./copy-button";
+import { initCustomSelects } from "./custom-select";
 import {
   destroyFontWeightProximity,
   initFontWeightProximity,
 } from "./font-weight-proximity";
+import { initFormsDemo } from "./forms-demo";
 import { initModals } from "./modal";
 import { initNav, initNavRouteTransitions } from "./nav";
 import { initScrollbar } from "./scrollbar";
@@ -10,9 +13,12 @@ import { initSmoothScroll } from "./smooth-scroll";
 
 let teardownModals: (() => void) | null = null;
 let teardownCopyButtons: (() => void) | null = null;
+let teardownCustomSelects: (() => void) | null = null;
+let teardownFormsDemo: (() => void) | null = null;
 let teardownSmoothScroll: (() => void) | null = null;
 let teardownScrollbar: (() => void) | null = null;
 let teardownNav: (() => void) | null = null;
+let teardownCodeTabs: (() => void) | null = null;
 
 initNavRouteTransitions();
 
@@ -26,7 +32,10 @@ function initPage() {
   teardownNav = initNav();
   initFontWeightProximity();
   teardownModals = initModals();
+  teardownCustomSelects = initCustomSelects();
+  teardownFormsDemo = initFormsDemo();
   teardownCopyButtons = initCopyButtons();
+  teardownCodeTabs = initCodeTabs();
 }
 
 function destroyPage() {
@@ -35,6 +44,12 @@ function destroyPage() {
   teardownModals = null;
   teardownCopyButtons?.();
   teardownCopyButtons = null;
+  teardownCodeTabs?.();
+  teardownCodeTabs = null;
+  teardownCustomSelects?.();
+  teardownCustomSelects = null;
+  teardownFormsDemo?.();
+  teardownFormsDemo = null;
   teardownNav?.();
   teardownNav = null;
   teardownScrollbar?.();

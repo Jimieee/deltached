@@ -1,0 +1,59 @@
+name: Feature request
+description: Suggest an improvement that fits deltached's focused scope
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. deltached aims to remain a small morph controller, so describing the underlying problem matters more than prescribing a large API.
+
+  - type: checkboxes
+    id: existing
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues, Discussions, and the roadmap for a similar request.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to build, and what prevents you from doing it today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest change that would solve the problem. Code examples are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What workarounds or existing APIs have you tried?
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Would you like to work on this?
+      options:
+        - "Yes"
+        - "Maybe, with guidance"
+        - "No"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: conduct
+    attributes:
+      label: Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct.
+          required: true

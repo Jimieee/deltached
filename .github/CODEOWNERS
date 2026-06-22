@@ -1,0 +1,10 @@
+# The maintainer reviews every change by default.
+* @Jimieee
+
+# Keep repository automation and the published package explicitly owned.
+/.github/ @Jimieee
+/.changeset/ @Jimieee
+/packages/deltached/ @Jimieee
+/package.json @Jimieee
+/pnpm-lock.yaml @Jimieee
+/pnpm-workspace.yaml @Jimieee

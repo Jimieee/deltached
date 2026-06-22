@@ -1,9 +1,25 @@
 {
   "name": "deltached",
-  "version": "0.1.0",
-  "description": "Deltached transitions for the web.",
+  "version": "0.0.0",
+  "description": "An interruptible shared-element morph controller for the web.",
   "type": "module",
   "sideEffects": false,
+  "keywords": [
+    "animation",
+    "gsap",
+    "morph",
+    "shared-element",
+    "transition"
+  ],
+  "homepage": "https://jimieee.github.io/deltached/",
+  "bugs": {
+    "url": "https://github.com/Jimieee/deltached/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jimieee/deltached.git",
+    "directory": "packages/deltached"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,13 +31,16 @@
     }
   },
   "files": [
+    "CHANGELOG.md",
     "dist",
     "README.md"
   ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm typecheck"
   },
   "peerDependencies": {
     "gsap": "^3.15.0"
@@ -31,5 +50,8 @@
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

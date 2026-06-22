@@ -115,7 +115,9 @@ export function capturePersistSnapshots(
     const ctx: PersistCaptureContext = { ...base, root, id, kind };
     const snapshot = { ...adapter.capture(el, ctx), id };
     if (snapshot.rect.width <= 0 || snapshot.rect.height <= 0) {
-      base.warn(`"${id}" has a zero-sized rect on the ${base.role} side; skipped.`);
+      base.warn(
+        `"${id}" has a zero-sized rect on the ${base.role} side; skipped.`,
+      );
       continue;
     }
     if (snapshot.kind === "canvas" && snapshot.canvas === null) {

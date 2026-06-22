@@ -25,6 +25,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
         with:
+          # changeset status diffs against main, so it needs full history.
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up pnpm

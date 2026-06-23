@@ -165,6 +165,23 @@ function wireMorph(root: HTMLElement): Cleanup {
   };
 }
 
+/**
+ * Decide, for every references group under `root`, whether its track overflows
+ * its cap — the same test `wireReferences` runs, but applied eagerly. The
+ * prev/next chevrons are revealed by `data-overflow`, and they add width to the
+ * pill. The morph measures the references to size its panel, so the overflow
+ * state must be settled *before* that measurement; otherwise the panel is sized
+ * ~2 chevrons too narrow and clips the references during a route morph.
+ */
+function primeReferencesOverflow(root: ParentNode): void {
+  root.querySelectorAll<HTMLElement>("[data-refs]").forEach((refs) => {
+    const track = refs.querySelector<HTMLElement>("[data-refs-track]");
+    if (track) {
+      refs.dataset.overflow = String(track.scrollWidth - track.clientWidth > 1);
+    }
+  });
+}
+
 /** Reveal the references chevrons only on overflow; page the track on click. */
 function wireReferences(refs: HTMLElement): Cleanup {
   const track = refs.querySelector<HTMLElement>("[data-refs-track]");
@@ -425,6 +442,9 @@ function primeMorphForRoute(root: HTMLElement): void {
     '[data-panel-layer="pages"]',
   );
   if (!chip || !panel || !refsLayer || !pagesLayer) return;
+
+  // Settle the chevrons before measuring so the panel includes their width.
+  primeReferencesOverflow(morph);
 
   const refsW = width(refsLayer);
   morph.dataset.navExpanded = "false";
@@ -833,6 +853,10 @@ export function initNavRouteTransitions(): Cleanup {
 }
 
 export function initNav(): Cleanup {
+  // Reveal overflow chevrons up front so the morph's first measurement already
+  // accounts for their width (see primeReferencesOverflow).
+  primeReferencesOverflow(document);
+
   const teardowns = Array.from(
     document.querySelectorAll<HTMLElement>("[data-navmorph]"),
   ).map(wireMorph);

@@ -27,18 +27,7 @@ interface Item {
   body: string;
 }
 
-const now: Item[] = [
-  {
-    title: "Official framework wrappers",
-    theme: "DX",
-    body: "Thin, optional bindings — a React useDeltached hook, a Vue composable, a Svelte action — over the same vanilla controller, handling setup and teardown for you.",
-  },
-  {
-    title: "The interruption test matrix",
-    theme: "Quality",
-    body: "Automated coverage for the hard part: starting enter and leave at every phase, plus placement clamping and persist handoff, so reversals stay glued together.",
-  },
-];
+const now: Item[] = [];
 
 const next: Item[] = [
   {
@@ -99,8 +88,9 @@ const horizons = [
     id: "now",
     kind: "now",
     tag: "Now",
-    title: "Building toward v0.2",
-    sub: "Actively in progress.",
+    title: "Nothing in flight",
+    sub: "Caught up — the framework wrappers just shipped.",
+    empty: "No work is pending right now. What's planned is in Next, below.",
     items: now,
   },
   {
@@ -158,17 +148,21 @@ const horizons = [
             <p class="sec__sub">{h.sub}</p>
           </div>
 
-          <ul class="items">
-            {h.items.map((item) => (
-              <li class="item">
-                <div class="item__top">
-                  <h3>{item.title}</h3>
-                  <span class="tag">{item.theme}</span>
-                </div>
-                <p>{item.body}</p>
-              </li>
-            ))}
-          </ul>
+          {h.items.length === 0 && "empty" in h ? (
+            <p class="sec__empty">{h.empty}</p>
+          ) : (
+            <ul class="items">
+              {h.items.map((item) => (
+                <li class="item">
+                  <div class="item__top">
+                    <h3>{item.title}</h3>
+                    <span class="tag">{item.theme}</span>
+                  </div>
+                  <p>{item.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       ))
     }
@@ -319,6 +313,18 @@ const horizons = [
       margin: 0.4rem 0 0;
       color: var(--muted);
       font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Empty horizon — a calm placeholder when nothing is in flight. */
+    .sec__empty {
+      margin: 0;
+      padding: 1.1rem 1.15rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--fg-soft);
+      font-size: 0.92rem;
       line-height: 1.5;
     }
 

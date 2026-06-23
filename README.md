@@ -1,11 +1,10 @@
 <div align="center">
 
-# Deltached.
+<img alt="Deltached." src="./assets/banner.png" width="640" />
 
-**An interruptible, in-page shared-element morph controller for the web.**
+<p><strong>An interruptible, in-page shared-element morph controller for the web.</strong></p>
 
-[![status](https://img.shields.io/badge/status-pre--release-orange.svg)](#install)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Status](https://img.shields.io/badge/status-pre--release-f59e0b?style=for-the-badge&labelColor=171717)](#install) [![License](https://img.shields.io/badge/license-MIT-171717?style=for-the-badge&labelColor=171717)](./LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-171717?style=for-the-badge&logo=typescript&logoColor=white&labelColor=171717)](https://www.typescriptlang.org) [![Docs](https://img.shields.io/badge/docs-deltached-171717?style=for-the-badge&logo=readthedocs&logoColor=white&labelColor=171717)](https://jimieee.github.io/deltached)
 
 </div>
 

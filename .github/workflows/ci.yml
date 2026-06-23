@@ -47,11 +47,13 @@ jobs:
       - name: Check formatting
         run: pnpm format:check
 
-      - name: Typecheck library
-        run: pnpm --filter deltached typecheck
-
+      # Build first so the framework wrappers can resolve the core's published
+      # types (dist/*.d.ts) when they are typechecked below.
       - name: Build workspace
         run: pnpm build
+
+      - name: Typecheck packages
+        run: pnpm typecheck
 
   test:
     name: E2E tests

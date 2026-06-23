@@ -10,12 +10,28 @@ const fail = (message) => {
   process.exit(1);
 };
 
-const packageJson = JSON.parse(
-  readFileSync(path.join(root, "packages/deltached/package.json"), "utf8"),
+const packagesDir = path.join(root, "packages");
+
+// Every publishable package under packages/* (core + framework wrappers).
+const publishable = readdirSync(packagesDir, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => ({
+    manifest: JSON.parse(
+      readFileSync(path.join(packagesDir, entry.name, "package.json"), "utf8"),
+    ),
+  }))
+  .filter(({ manifest }) => manifest.private !== true);
+
+const unversioned = publishable.filter(
+  ({ manifest }) => manifest.version === "0.0.0",
 );
 
-if (packageJson.version === "0.0.0") {
-  fail("the initial release PR has not versioned deltached yet");
+if (unversioned.length > 0) {
+  fail(
+    `the release PR has not versioned yet: ${unversioned
+      .map(({ manifest }) => manifest.name)
+      .join(", ")}`,
+  );
 }
 
 const pendingChangesets = readdirSync(path.join(root, ".changeset")).filter(
@@ -48,4 +64,8 @@ if (git("status", "--porcelain")) {
   fail("commit or discard all working-tree changes before publishing");
 }
 
-console.log(`Release checks passed for deltached@${packageJson.version}.`);
+console.log(
+  `Release checks passed for ${publishable
+    .map(({ manifest }) => `${manifest.name}@${manifest.version}`)
+    .join(", ")}.`,
+);

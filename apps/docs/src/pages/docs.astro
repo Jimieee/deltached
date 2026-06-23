@@ -366,27 +366,35 @@ const timingRows = [
         choice.
       </p>
       <CodeGroup tabs={install} id="install" />
+      <p>
+        Using React, Vue, or Svelte? Add the official wrapper alongside —
+        <code>@deltached/react</code>, <code>@deltached/vue</code>, or
+        <code>@deltached/svelte</code> (for example,
+        <code>npm install @deltached/react deltached gsap</code>). Each wraps
+        this same controller; see <a href="#quick-start">Quick start</a>.
+      </p>
     </section>
 
     {/* ---- Quick start ---------------------------------------------- */}
     <section id="quick-start" class="sec">
       <h2>Quick start</h2>
       <p>
-        Two elements and three calls: construct a transition, drive it on click,
-        and tear it down when the component unmounts. The markup is the same
-        everywhere — the target just starts <code>hidden</code> so it can be
-        measured at rest before it ever paints.
+        A source the panel grows out of, a target that morphs. The JavaScript
+        and Angular tabs wire the vanilla controller against the markup below;
+        React, Vue, and Svelte use their official wrapper, which creates and
+        destroys the controller — and reveals the target — for you.
       </p>
 
       <CodeBlock code={quickStartHtml} lang="html" title="index.html" />
 
       <CodeGroup tabs={quickStart} id="quick-start" />
 
-      <Callout kind="tip" title="Why the hooks?">
+      <Callout kind="tip" title="Revealing the target">
         deltached owns animation and visibility, nothing else. The target has to
-        be in the DOM and measurable when the read phase runs, so you reveal it
-        in <code>beforeEnter</code> and hide it again in <code>afterLeave</code>.
-        That's also where scroll-locking, focus, and mounting belong.
+        be in the DOM and measurable when the read phase runs. The vanilla tabs
+        reveal it in <code>beforeEnter</code> and hide it in
+        <code>afterLeave</code> — also where scroll-locking, focus, and mounting
+        belong; the wrappers do this for you via <code>autoHide</code>.
       </Callout>
     </section>
 

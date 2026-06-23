@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+#trigger {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  width: 120px;
+  height: 44px;
+}
+
+#panel {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: 320px;
+  height: 240px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 12px;
+}
+
+#panel[hidden] {
+  display: none;
+}

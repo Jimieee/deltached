@@ -1,0 +1,62 @@
+{
+  "name": "@deltached/svelte",
+  "version": "0.0.0",
+  "description": "Svelte bindings for deltached — a useDeltached attachment over the vanilla morph controller.",
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "animation",
+    "deltached",
+    "morph",
+    "shared-element",
+    "svelte",
+    "transition"
+  ],
+  "homepage": "https://jimieee.github.io/deltached/",
+  "bugs": {
+    "url": "https://github.com/Jimieee/deltached/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jimieee/deltached.git",
+    "directory": "packages/svelte"
+  },
+  "svelte": "./dist/index.svelte.js",
+  "types": "./dist/index.svelte.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.svelte.d.ts",
+      "svelte": "./dist/index.svelte.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "svelte-package",
+    "dev": "svelte-package --watch",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm typecheck"
+  },
+  "peerDependencies": {
+    "svelte": "^5.29.0"
+  },
+  "dependencies": {
+    "deltached": "workspace:^"
+  },
+  "devDependencies": {
+    "@sveltejs/package": "^2.5.0",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "svelte": "^5.29.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "^6.0.3"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

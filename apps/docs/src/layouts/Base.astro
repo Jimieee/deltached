@@ -39,13 +39,37 @@ const ogImageURL = new URL(image ?? `${BASE}og-image.png`, Astro.site);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#ffffff" />
+
+    {/* Resolve the theme before first paint so there is no light flash, and
+        re-apply after route swaps (the <html> class can be reset on swap). */}
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const apply = () => {
+          const stored = localStorage.getItem("theme");
+          const dark = stored
+            ? stored === "dark"
+            : matchMedia("(prefers-color-scheme: dark)").matches;
+          root.classList.toggle("dark", dark);
+          root.style.colorScheme = dark ? "dark" : "light";
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute("content", dark ? "#0a0a0b" : "#ffffff");
+        };
+        apply();
+        if (!window.__themeBound) {
+          window.__themeBound = true;
+          document.addEventListener("astro:after-swap", apply);
+        }
+      })();
+    </script>
 
     <!-- Primary meta -->
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#ffffff" />
 
     <!-- Icons -->
     <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />

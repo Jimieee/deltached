@@ -44,6 +44,10 @@ function wireMorph(root: HTMLElement): Cleanup {
     !root.closest("[data-route-nav-hidden]");
 
   const measure = () => {
+    // Sync the overflow chevrons first: on resize they share the references
+    // width with this measurement, so reading before they settle would freeze a
+    // stale panel width (empty gap, or chevrons stuck on/off).
+    primeReferencesOverflow(root);
     refsW = width(refsLayer);
     pagesW = width(pagesLayer);
   };

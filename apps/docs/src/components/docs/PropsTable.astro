@@ -76,7 +76,7 @@ const { rows } = Astro.props;
   }
 
   .pt__type {
-    color: var(--ex-accent, #0071e3);
+    color: var(--accent);
     font-size: 0.8rem;
     word-break: break-word;
   }
@@ -103,13 +103,13 @@ const { rows } = Astro.props;
   .pt__default code {
     padding: 0.05em 0.4em;
     border-radius: var(--radius-xs);
-    background: color-mix(in srgb, var(--fg) 6%, transparent);
+    background: var(--chip);
     color: var(--fg-soft);
     font-size: 0.78rem;
   }
 
   .pt__required {
-    color: #ff9500;
+    color: var(--warning);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-size: 0.62rem;
@@ -133,7 +133,7 @@ const { rows } = Astro.props;
   .pt__desc :global(code) {
     padding: 0.05em 0.35em;
     border-radius: var(--radius-xs);
-    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    background: var(--chip);
     font-size: 0.85em;
   }
 

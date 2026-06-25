@@ -658,15 +658,8 @@ createDeltachedTransition({
 </Base>
 
 <style>
-  /*
-   * Docs are a single reading column. The Apple-derived --ex-* accents from the
-   * examples page are mirrored here so the shared docs components (tables,
-   * callouts) speak the same palette site-wide.
-   */
+  /* Docs are a single reading column. */
   .page {
-    --ex-accent: #0071e3;
-    --ex-sep: rgba(60, 60, 67, 0.12);
-
     width: min(100%, 52rem);
     margin: 0 auto;
     padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
@@ -679,7 +672,7 @@ createDeltachedTransition({
 
   .eyebrow {
     margin: 0 0 0.6rem;
-    color: var(--ex-accent);
+    color: var(--accent);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -750,7 +743,7 @@ createDeltachedTransition({
   }
 
   .terms li::marker {
-    color: var(--ex-accent);
+    color: var(--accent);
   }
 
   strong {
@@ -763,7 +756,7 @@ createDeltachedTransition({
   }
 
   a {
-    color: var(--ex-accent);
+    color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
@@ -775,7 +768,7 @@ createDeltachedTransition({
   li code {
     padding: 0.08em 0.38em;
     border-radius: var(--radius-xs);
-    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    background: var(--chip);
     color: var(--fg);
     font-family: "Geist Mono Variable", ui-monospace, monospace;
     font-size: 0.85em;
@@ -790,7 +783,7 @@ createDeltachedTransition({
   }
 
   .phases span {
-    color: var(--ex-accent);
+    color: var(--accent);
   }
 
   /* Spacing between stacked docs components. */

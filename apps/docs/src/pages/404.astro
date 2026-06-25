@@ -1,6 +1,6 @@
 ---
-import Base from "../layouts/Base.astro";
 import { withBase } from "../config/nav";
+import Base from "../layouts/Base.astro";
 ---
 
 <Base
@@ -57,10 +57,15 @@ import { withBase } from "../config/nav";
     padding: clamp(1.5rem, 5vw, 5rem);
 
     overflow: hidden;
-    background: var(--fg);
+    background: var(--ink);
     color: var(--ink-fg);
+    border: 1px solid transparent;
     border-radius: var(--radius-2xl);
     box-sizing: border-box;
+  }
+
+  :global(html.dark) .panel {
+    border-color: var(--border);
   }
 
   .content {
@@ -110,7 +115,7 @@ import { withBase } from "../config/nav";
 
     border-radius: var(--radius-pill);
     background: var(--ink-fg);
-    color: var(--fg);
+    color: var(--ink);
 
     font-size: 0.95rem;
     font-weight: 500;

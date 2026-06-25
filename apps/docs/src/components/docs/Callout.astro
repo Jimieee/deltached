@@ -51,18 +51,18 @@ const meta = META[kind];
   }
 
   .callout--note {
-    --c-accent: #0071e3; /* system blue */
-    --c-tint: color-mix(in srgb, #0071e3 6%, var(--surface));
+    --c-accent: var(--accent);
+    --c-tint: color-mix(in srgb, var(--accent) 6%, var(--surface));
   }
 
   .callout--tip {
-    --c-accent: #34c759; /* system green */
-    --c-tint: color-mix(in srgb, #34c759 7%, var(--surface));
+    --c-accent: var(--success);
+    --c-tint: color-mix(in srgb, var(--success) 7%, var(--surface));
   }
 
   .callout--caution {
-    --c-accent: #ff9500; /* system orange */
-    --c-tint: color-mix(in srgb, #ff9500 8%, var(--surface));
+    --c-accent: var(--warning);
+    --c-tint: color-mix(in srgb, var(--warning) 8%, var(--surface));
   }
 
   .callout__icon {
@@ -101,7 +101,7 @@ const meta = META[kind];
   .callout__body :global(code) {
     padding: 0.05em 0.35em;
     border-radius: var(--radius-xs);
-    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    background: var(--chip);
     font-size: 0.85em;
   }
 

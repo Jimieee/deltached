@@ -6,6 +6,7 @@
 
 <!-- On publish, swap the pre-release badge for the live npm version:
 [![npm](https://img.shields.io/npm/v/@deltached/react?style=for-the-badge&logo=npm&logoColor=white&labelColor=171717&color=171717)](https://www.npmjs.com/package/@deltached/react) -->
+
 [![React](https://img.shields.io/badge/React-171717?style=for-the-badge&logo=react&logoColor=white&labelColor=171717)](https://react.dev) [![Status](https://img.shields.io/badge/status-pre--release-f59e0b?style=for-the-badge&labelColor=171717)](#installation) [![License](https://img.shields.io/badge/license-MIT-171717?style=for-the-badge&labelColor=171717)](https://github.com/Jimieee/deltached/blob/main/LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-171717?style=for-the-badge&logo=typescript&logoColor=white&labelColor=171717)](https://www.typescriptlang.org)
 
 </div>

@@ -46,10 +46,16 @@ import Base from "../layouts/Base.astro";
     padding: clamp(1.5rem, 5vw, 5rem);
 
     overflow: hidden;
-    background: var(--fg);
+    background: var(--ink);
     color: var(--ink-fg);
+    border: 1px solid transparent;
     border-radius: var(--radius-2xl);
     box-sizing: border-box;
+  }
+
+  /* In dark the panel sits close to the page; a hairline keeps it framed. */
+  :global(html.dark) .panel {
+    border-color: var(--border);
   }
 
   .content {

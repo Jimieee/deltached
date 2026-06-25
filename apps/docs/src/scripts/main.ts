@@ -10,6 +10,7 @@ import { initModals } from "./modal";
 import { initNav, initNavRouteTransitions } from "./nav";
 import { initScrollbar } from "./scrollbar";
 import { initSmoothScroll } from "./smooth-scroll";
+import { initTheme } from "./theme";
 
 let teardownModals: (() => void) | null = null;
 let teardownCopyButtons: (() => void) | null = null;
@@ -19,6 +20,7 @@ let teardownSmoothScroll: (() => void) | null = null;
 let teardownScrollbar: (() => void) | null = null;
 let teardownNav: (() => void) | null = null;
 let teardownCodeTabs: (() => void) | null = null;
+let teardownTheme: (() => void) | null = null;
 
 initNavRouteTransitions();
 
@@ -30,6 +32,7 @@ function initPage() {
   teardownSmoothScroll = initSmoothScroll();
   teardownScrollbar = initScrollbar();
   teardownNav = initNav();
+  teardownTheme = initTheme();
   initFontWeightProximity();
   teardownModals = initModals();
   teardownCustomSelects = initCustomSelects();
@@ -52,6 +55,8 @@ function destroyPage() {
   teardownFormsDemo = null;
   teardownNav?.();
   teardownNav = null;
+  teardownTheme?.();
+  teardownTheme = null;
   teardownScrollbar?.();
   teardownScrollbar = null;
   teardownSmoothScroll?.();

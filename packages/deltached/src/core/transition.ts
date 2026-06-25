@@ -113,6 +113,21 @@ const CONTENT_RESET_PROPS = "opacity,visibility,filter";
  * target while it drives their opacity/visibility/transform so consumer CSS
  * can suppress its own transitions during the handoff (see `dom.ts`).
  */
+/**
+ * A 0×0 read means the target was never laid out — almost always a target left
+ * at `display: none` (e.g. the `hidden` attribute) that `beforeEnter` failed to
+ * reveal. The morph would silently animate from nothing, so surface it.
+ */
+function warnIfUnmeasurable(target: HTMLElement, geo: ElementGeometry): void {
+  if (geo.rect.width > 0 || geo.rect.height > 0) return;
+  console.warn(
+    "[DeltachedTransition] target measured 0×0 at enter() — it is likely " +
+      "still display:none. Lay it out in beforeEnter before the morph " +
+      "measures (the React/Vue/Svelte wrappers do this via autoHide).",
+    target,
+  );
+}
+
 export class DeltachedTransition {
   private readonly target: HTMLElement;
   private readonly backdrop: HTMLElement | null;
@@ -261,6 +276,7 @@ export class DeltachedTransition {
             gsap.set(this.target, { autoAlpha: 0 });
             this.hooks.beforeEnter?.();
             const naturalGeo = measureGeometry(this.target);
+            warnIfUnmeasurable(this.target, naturalGeo);
             if (isOriginPlacement(placement)) {
               // Reduced motion skips the morph, but origin placement must still
               // open the panel at the source instead of the CSS center: pin it
@@ -291,6 +307,7 @@ export class DeltachedTransition {
           // Read phase: both measurements together, after the hook's writes.
           const sourceGeo = measureGeometry(from);
           const naturalGeo = measureGeometry(this.target);
+          warnIfUnmeasurable(this.target, naturalGeo);
           // Origin placement rebases the resting frame onto the source (clamped
           // to the viewport, read once here); center leaves the natural in-flow
           // frame untouched. Either way naturalGeo is the open-end of the morph.

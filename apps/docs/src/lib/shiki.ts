@@ -13,8 +13,8 @@
  */
 import { createHighlighter, type Highlighter } from "shiki";
 
-/** Muted, low-contrast light theme — reads as documentation, not an IDE. */
 export const CODE_THEME = "github-light";
+export const CODE_THEME_DARK = "github-dark";
 
 /**
  * Every language used across the docs. Angular/React/Vue/Svelte components are
@@ -40,7 +40,7 @@ let highlighterPromise: Promise<Highlighter> | null = null;
 function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
     highlighterPromise = createHighlighter({
-      themes: [CODE_THEME],
+      themes: [CODE_THEME, CODE_THEME_DARK],
       langs: [...LANGS],
     });
   }
@@ -69,6 +69,7 @@ export async function highlight(code: string, lang: CodeLang): Promise<string> {
   const hl = await getHighlighter();
   return hl.codeToHtml(code.replace(/^\n+|\n+$/g, ""), {
     lang: resolveLang(lang),
-    theme: CODE_THEME,
+    themes: { light: CODE_THEME, dark: CODE_THEME_DARK },
+    defaultColor: "light",
   });
 }

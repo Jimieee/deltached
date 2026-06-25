@@ -1,9 +1,15 @@
-# deltached
+<div align="center">
+
+<img alt="deltached" src="https://raw.githubusercontent.com/Jimieee/deltached/main/assets/banner.png" width="640" />
+
+<!-- On publish, swap the pre-release badge for the live npm version:
+[![npm](https://img.shields.io/npm/v/deltached?style=for-the-badge&logo=npm&logoColor=white&labelColor=171717&color=171717)](https://www.npmjs.com/package/deltached) -->
+
+[![Status](https://img.shields.io/badge/status-pre--release-f59e0b?style=for-the-badge&labelColor=171717)](#installation) [![License](https://img.shields.io/badge/license-MIT-171717?style=for-the-badge&labelColor=171717)](https://github.com/Jimieee/deltached/blob/main/LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-171717?style=for-the-badge&logo=typescript&logoColor=white&labelColor=171717)](https://www.typescriptlang.org) [![Docs](https://img.shields.io/badge/docs-deltached-171717?style=for-the-badge&logo=readthedocs&logoColor=white&labelColor=171717)](https://jimieee.github.io/deltached)
+
+</div>
 
 > An interruptible, in-page shared-element morph controller for the web.
-
-[![status](https://img.shields.io/badge/status-pre--release-orange.svg)](#installation)
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Jimieee/deltached/blob/main/LICENSE)
 
 deltached is not a modal library — it's a morph controller. You give it two
 elements, a **source** and a **target**, and it animates one growing into the

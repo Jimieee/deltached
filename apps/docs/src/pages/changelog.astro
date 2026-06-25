@@ -62,8 +62,6 @@ const hasPublishedReleases = /^##\s+/m.test(changelog.body ?? "");
 
   <style>
     .page {
-      --ex-accent: #0071e3;
-
       width: min(100%, 52rem);
       margin: 0 auto;
       padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
@@ -76,7 +74,7 @@ const hasPublishedReleases = /^##\s+/m.test(changelog.body ?? "");
 
     .eyebrow {
       margin: 0 0 0.6rem;
-      color: var(--ex-accent);
+      color: var(--accent);
       font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.02em;
@@ -128,8 +126,8 @@ const hasPublishedReleases = /^##\s+/m.test(changelog.body ?? "");
       margin: 1.15rem 0 0.25rem;
       padding: 0.16rem 0.6rem;
       border-radius: var(--radius-pill);
-      background: color-mix(in srgb, var(--ex-accent) 12%, transparent);
-      color: var(--ex-accent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--accent);
       font-size: 0.72rem;
       font-weight: 650;
       letter-spacing: 0.02em;
@@ -152,7 +150,7 @@ const hasPublishedReleases = /^##\s+/m.test(changelog.body ?? "");
     }
 
     .changelog :global(li::marker) {
-      color: var(--ex-accent);
+      color: var(--accent);
     }
 
     .footer-note {
@@ -163,7 +161,7 @@ const hasPublishedReleases = /^##\s+/m.test(changelog.body ?? "");
     }
 
     a {
-      color: var(--ex-accent);
+      color: var(--accent);
       text-decoration: underline;
       text-decoration-thickness: 1px;
       text-underline-offset: 2px;

@@ -1,0 +1,163 @@
+---
+import { withBase } from "../config/nav";
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="Page not found — deltached"
+  description="The page you're looking for can't be found."
+>
+  <main class="hero center">
+    <section class="panel">
+      <div class="content">
+        <p class="eyebrow">404</p>
+
+        <h1>We can't find that page.</h1>
+
+        <p class="lead">
+          The link may be broken, or the page may have moved. Here's the way
+          back.
+        </p>
+
+        <div class="actions">
+          <a class="primary" href={withBase("/")}>Back to home</a>
+
+          <nav class="links" aria-label="Suggested pages">
+            <a href={withBase("/docs")}>Docs</a>
+            <a href={withBase("/examples")}>Examples</a>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .center {
+    display: grid;
+  }
+
+  .hero {
+    width: 100%;
+    min-height: calc(100dvh - 112px);
+    min-width: 0;
+
+    padding: 0 1rem 1rem;
+    overflow: hidden;
+  }
+
+  .panel {
+    width: 100%;
+    min-height: 100%;
+    min-width: 0;
+
+    display: grid;
+    place-items: center;
+
+    padding: clamp(1.5rem, 5vw, 5rem);
+
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--ink-fg);
+    border: 1px solid transparent;
+    border-radius: var(--radius-2xl);
+    box-sizing: border-box;
+  }
+
+  :global(html.dark) .panel {
+    border-color: var(--border);
+  }
+
+  .content {
+    width: min(100%, 40rem);
+    text-align: center;
+  }
+
+  .eyebrow {
+    margin: 0;
+    font-family: "Geist Mono Variable", ui-monospace, monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.32em;
+    text-indent: 0.32em;
+    opacity: 0.5;
+  }
+
+  h1 {
+    margin: 0.9rem 0 0;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .lead {
+    max-width: 30rem;
+    margin: 1.1rem auto 0;
+    font-size: clamp(0.85rem, 1.2vw, 0.95rem);
+    line-height: 1.5;
+    opacity: 0.66;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2.25rem;
+  }
+
+  /* The single, unmistakable way out — a light pill on the dark panel. */
+  .primary {
+    display: inline-flex;
+    align-items: center;
+    height: 2.75rem;
+    padding: 0 1.5rem;
+
+    border-radius: var(--radius-pill);
+    background: var(--ink-fg);
+    color: var(--ink);
+
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity var(--ease);
+  }
+  .primary:hover,
+  .primary:focus-visible {
+    opacity: 0.88;
+  }
+
+  .links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  .links a {
+    color: var(--ink-fg);
+    font-size: 0.9rem;
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity var(--ease);
+  }
+  .links a:hover,
+  .links a:focus-visible {
+    opacity: 1;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding: max(0.5rem, env(safe-area-inset-top))
+        max(0.5rem, env(safe-area-inset-right))
+        max(0.5rem, env(safe-area-inset-bottom))
+        max(0.5rem, env(safe-area-inset-left));
+    }
+
+    .panel {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-xl);
+      padding-top: calc(var(--nav-size-sm) + 3rem);
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+      padding-inline: 1.5rem;
+    }
+  }
+</style>

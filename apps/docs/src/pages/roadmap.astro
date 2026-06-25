@@ -27,18 +27,7 @@ interface Item {
   body: string;
 }
 
-const now: Item[] = [
-  {
-    title: "Official framework wrappers",
-    theme: "DX",
-    body: "Thin, optional bindings — a React useDeltached hook, a Vue composable, a Svelte action — over the same vanilla controller, handling setup and teardown for you.",
-  },
-  {
-    title: "The interruption test matrix",
-    theme: "Quality",
-    body: "Automated coverage for the hard part: starting enter and leave at every phase, plus placement clamping and persist handoff, so reversals stay glued together.",
-  },
-];
+const now: Item[] = [];
 
 const next: Item[] = [
   {
@@ -99,8 +88,9 @@ const horizons = [
     id: "now",
     kind: "now",
     tag: "Now",
-    title: "Building toward v0.2",
-    sub: "Actively in progress.",
+    title: "Nothing in flight",
+    sub: "Caught up — the framework wrappers just shipped.",
+    empty: "No work is pending right now. What's planned is in Next, below.",
     items: now,
   },
   {
@@ -158,17 +148,21 @@ const horizons = [
             <p class="sec__sub">{h.sub}</p>
           </div>
 
-          <ul class="items">
-            {h.items.map((item) => (
-              <li class="item">
-                <div class="item__top">
-                  <h3>{item.title}</h3>
-                  <span class="tag">{item.theme}</span>
-                </div>
-                <p>{item.body}</p>
-              </li>
-            ))}
-          </ul>
+          {h.items.length === 0 && "empty" in h ? (
+            <p class="sec__empty">{h.empty}</p>
+          ) : (
+            <ul class="items">
+              {h.items.map((item) => (
+                <li class="item">
+                  <div class="item__top">
+                    <h3>{item.title}</h3>
+                    <span class="tag">{item.theme}</span>
+                  </div>
+                  <p>{item.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       ))
     }
@@ -197,8 +191,6 @@ const horizons = [
 
   <style>
     .page {
-      --ex-accent: #0071e3;
-
       width: min(100%, 52rem);
       margin: 0 auto;
       padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
@@ -211,7 +203,7 @@ const horizons = [
 
     .eyebrow {
       margin: 0 0 0.6rem;
-      color: var(--ex-accent);
+      color: var(--accent);
       font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.02em;
@@ -286,20 +278,20 @@ const horizons = [
     }
 
     .horizon--now {
-      border-color: color-mix(in srgb, #34c759 35%, var(--border));
-      color: #248a3d;
+      border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+      color: var(--success-fg);
     }
     .horizon--now .horizon__dot {
-      background: #34c759; /* systemGreen — in flight */
-      box-shadow: 0 0 0 3px color-mix(in srgb, #34c759 22%, transparent);
+      background: var(--success); /* systemGreen — in flight */
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 22%, transparent);
     }
 
     .horizon--next {
-      border-color: color-mix(in srgb, var(--ex-accent) 35%, var(--border));
-      color: var(--ex-accent);
+      border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+      color: var(--accent);
     }
     .horizon--next .horizon__dot {
-      background: var(--ex-accent); /* systemBlue — planned */
+      background: var(--accent); /* systemBlue — planned */
     }
 
     .horizon--exploring .horizon__dot {
@@ -319,6 +311,18 @@ const horizons = [
       margin: 0.4rem 0 0;
       color: var(--muted);
       font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Empty horizon — a calm placeholder when nothing is in flight. */
+    .sec__empty {
+      margin: 0;
+      padding: 1.1rem 1.15rem;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      color: var(--fg-soft);
+      font-size: 0.92rem;
       line-height: 1.5;
     }
 
@@ -360,7 +364,7 @@ const horizons = [
       flex: 0 0 auto;
       padding: 0.15rem 0.5rem;
       border-radius: var(--radius-xs);
-      background: color-mix(in srgb, var(--fg) 6%, transparent);
+      background: var(--chip);
       color: var(--fg-soft);
       font-size: 0.66rem;
       font-weight: 600;
@@ -405,7 +409,7 @@ const horizons = [
     }
 
     a {
-      color: var(--ex-accent);
+      color: var(--accent);
       text-decoration: underline;
       text-underline-offset: 2px;
       text-decoration-thickness: 1px;

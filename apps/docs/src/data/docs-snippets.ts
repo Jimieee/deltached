@@ -1,10 +1,12 @@
 /**
  * Code samples for the docs page, kept out of the page markup so the prose
- * stays readable. The quick-start group is the canonical wiring shown once in
- * every supported framework; the rest are focused single snippets referenced
- * inline. Every framework variant does the SAME three things — construct a
- * transition against a target + source, drive it on click, and DESTROY it on
- * teardown — so the differences read as framework idiom, not behavior.
+ * stays readable. The quick-start group shows the canonical wiring per
+ * framework: JavaScript and Angular drive the vanilla controller directly,
+ * while React, Vue, and Svelte use their official wrapper (`useDeltached`),
+ * which creates and destroys the controller and toggles the target's
+ * visibility for you. Every variant does the same thing — grow a target out of
+ * a source and play it back on close — so the differences read as framework
+ * idiom, not behavior.
  */
 import type { CodeLang } from "../lib/shiki";
 
@@ -61,35 +63,18 @@ panel
     lang: "tsx",
     title: "MorphPanel.tsx",
     code: `
-import { useEffect, useRef } from "react";
-import { createDeltachedTransition, type DeltachedTransition } from "deltached";
+import { useDeltached } from "@deltached/react";
 
 export function MorphPanel() {
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const tx = useRef<DeltachedTransition | null>(null);
-
-  useEffect(() => {
-    const panel = panelRef.current!;
-    tx.current = createDeltachedTransition({
-      target: panel,
-      source: triggerRef.current,
-      hooks: {
-        beforeEnter: () => (panel.hidden = false),
-        afterLeave: () => (panel.hidden = true),
-      },
-    });
-    // Revert every style and listener the controller owns on unmount.
-    return () => tx.current?.destroy();
-  }, []);
+  const { sourceRef, targetRef, enter, leave } = useDeltached();
 
   return (
     <>
-      <button ref={triggerRef} onClick={() => tx.current?.enter()}>
+      <button ref={sourceRef} onClick={() => enter()}>
         Open panel
       </button>
-      <div ref={panelRef} hidden>
-        <button onClick={() => tx.current?.leave()}>Close</button>
+      <div ref={targetRef}>
+        <button onClick={() => leave()}>Close</button>
         <h2>Now you see me</h2>
       </div>
     </>
@@ -103,31 +88,15 @@ export function MorphPanel() {
     title: "MorphPanel.vue",
     code: `
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
-import { createDeltachedTransition, type DeltachedTransition } from "deltached";
+import { useDeltached } from "@deltached/vue";
 
-const trigger = ref<HTMLButtonElement>();
-const panel = ref<HTMLDivElement>();
-let tx: DeltachedTransition;
-
-onMounted(() => {
-  tx = createDeltachedTransition({
-    target: panel.value!,
-    source: trigger.value,
-    hooks: {
-      beforeEnter: () => (panel.value!.hidden = false),
-      afterLeave: () => (panel.value!.hidden = true),
-    },
-  });
-});
-
-onUnmounted(() => tx.destroy());
+const { sourceRef, targetRef, enter, leave } = useDeltached();
 </script>
 
 <template>
-  <button ref="trigger" @click="tx.enter()">Open panel</button>
-  <div ref="panel" hidden>
-    <button @click="tx.leave()">Close</button>
+  <button :ref="sourceRef" @click="enter()">Open panel</button>
+  <div :ref="targetRef">
+    <button @click="leave()">Close</button>
     <h2>Now you see me</h2>
   </div>
 </template>
@@ -187,30 +156,14 @@ export class MorphPanelComponent implements AfterViewInit, OnDestroy {
     title: "MorphPanel.svelte",
     code: `
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { createDeltachedTransition, type DeltachedTransition } from "deltached";
+  import { useDeltached } from "@deltached/svelte";
 
-  let trigger: HTMLButtonElement;
-  let panel: HTMLDivElement;
-  let tx: DeltachedTransition;
-
-  onMount(() => {
-    tx = createDeltachedTransition({
-      target: panel,
-      source: trigger,
-      hooks: {
-        beforeEnter: () => (panel.hidden = false),
-        afterLeave: () => (panel.hidden = true),
-      },
-    });
-    // onMount's return runs on destroy — revert everything here.
-    return () => tx.destroy();
-  });
+  const d = useDeltached();
 </script>
 
-<button bind:this={trigger} on:click={() => tx.enter()}>Open panel</button>
-<div bind:this={panel} hidden>
-  <button on:click={() => tx.leave()}>Close</button>
+<button {@attach d.source} onclick={() => d.enter()}>Open panel</button>
+<div {@attach d.target}>
+  <button onclick={() => d.leave()}>Close</button>
   <h2>Now you see me</h2>
 </div>
 `,

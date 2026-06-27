@@ -1,6 +1,6 @@
 {
   "name": "@deltached/vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vue bindings for deltached — a useDeltached composable over the vanilla morph controller.",
   "type": "module",
   "sideEffects": false,

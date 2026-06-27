@@ -1,6 +1,6 @@
 {
   "name": "@deltached/react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React bindings for deltached — a useDeltached hook over the vanilla morph controller.",
   "type": "module",
   "sideEffects": false,

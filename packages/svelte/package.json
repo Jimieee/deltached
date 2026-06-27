@@ -1,6 +1,6 @@
 {
   "name": "@deltached/svelte",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Svelte bindings for deltached — a useDeltached attachment over the vanilla morph controller.",
   "type": "module",
   "sideEffects": false,

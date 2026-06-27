@@ -4,10 +4,7 @@
 
 # @deltached/vue
 
-<!-- On publish, swap the pre-release badge for the live npm version:
-[![npm](https://img.shields.io/npm/v/@deltached/vue?style=for-the-badge&logo=npm&logoColor=white&labelColor=171717&color=171717)](https://www.npmjs.com/package/@deltached/vue) -->
-
-[![Vue](https://img.shields.io/badge/Vue-171717?style=for-the-badge&logo=vuedotjs&logoColor=white&labelColor=171717)](https://vuejs.org) [![Status](https://img.shields.io/badge/status-pre--release-f59e0b?style=for-the-badge&labelColor=171717)](#installation) [![License](https://img.shields.io/badge/license-MIT-171717?style=for-the-badge&labelColor=171717)](https://github.com/Jimieee/deltached/blob/main/LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-171717?style=for-the-badge&logo=typescript&logoColor=white&labelColor=171717)](https://www.typescriptlang.org)
+[![Vue](https://img.shields.io/badge/Vue-171717?style=for-the-badge&logo=vuedotjs&logoColor=white&labelColor=171717)](https://vuejs.org) [![npm](https://img.shields.io/npm/v/@deltached/vue?style=for-the-badge&logo=npm&logoColor=white&labelColor=171717&color=171717)](https://www.npmjs.com/package/@deltached/vue) [![License](https://img.shields.io/badge/license-MIT-171717?style=for-the-badge&labelColor=171717)](https://github.com/Jimieee/deltached/blob/main/LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-171717?style=for-the-badge&logo=typescript&logoColor=white&labelColor=171717)](https://www.typescriptlang.org)
 
 </div>
 
@@ -19,12 +16,9 @@ and animates.
 
 ## Installation
 
-> **Pre-release — not on npm yet.** The first release is in preparation. Once
-> published, install with:
->
-> ```bash
-> npm install @deltached/vue deltached gsap
-> ```
+```bash
+npm install @deltached/vue deltached gsap
+```
 
 `deltached` and [GSAP](https://gsap.com) are peer dependencies — install them
 alongside.

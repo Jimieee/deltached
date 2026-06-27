@@ -124,6 +124,18 @@
 
 * {
   box-sizing: border-box;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button,
+[role="button"],
+.link,
+[data-modal-open],
+[data-modal-close] {
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 body {

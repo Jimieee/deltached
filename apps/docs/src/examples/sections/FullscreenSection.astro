@@ -150,13 +150,11 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
 </style>
 
 <style is:global>
-  /* The fullscreen panel: the morph target is the whole viewport. The double
-     class beats the base `.modal { padding: 1rem }` so nothing gutters it. */
-  .modal.ex-reader {
+  .modal.ex-reader[data-modal] {
     padding: 0;
   }
 
-  .ex-reader .modal__panel {
+  .modal.ex-reader .modal__panel {
     width: 100vw;
     height: 100dvh;
     max-width: none;
@@ -166,8 +164,12 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
     border-radius: 0;
   }
 
+  .modal.ex-reader .modal__body {
+    margin-top: 0;
+  }
+
   /* Glass close button floating over the photo, à la the Photos viewer. */
-  .ex-reader .modal__close {
+  .modal.ex-reader .modal__close {
     top: 1rem;
     right: 1rem;
     z-index: 2;
@@ -179,8 +181,8 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
     -webkit-backdrop-filter: blur(0.6rem);
   }
 
-  .ex-reader .modal__close:hover,
-  .ex-reader .modal__close:focus-visible {
+  .modal.ex-reader .modal__close:hover,
+  .modal.ex-reader .modal__close:focus-visible {
     background: rgba(0, 0, 0, 0.62);
     color: #fff;
   }

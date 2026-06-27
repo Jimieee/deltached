@@ -1,0 +1,62 @@
+{
+  "name": "@deltached/vue",
+  "version": "0.1.0",
+  "description": "Vue bindings for deltached — a useDeltached composable over the vanilla morph controller.",
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "animation",
+    "deltached",
+    "morph",
+    "shared-element",
+    "transition",
+    "vue"
+  ],
+  "homepage": "https://jimieee.github.io/deltached/",
+  "bugs": {
+    "url": "https://github.com/Jimieee/deltached/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jimieee/deltached.git",
+    "directory": "packages/vue"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm typecheck"
+  },
+  "peerDependencies": {
+    "vue": ">=3.3"
+  },
+  "dependencies": {
+    "deltached": "workspace:^"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vue": "^3.5.0"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

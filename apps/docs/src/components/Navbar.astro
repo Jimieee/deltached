@@ -28,11 +28,7 @@ const hasReferences = references.length > 0;
   data-route-nav="desktop"
   data-nav-has-references={String(hasReferences)}
 >
-  <a
-    class="circle"
-    href={navItems[0].href}
-    aria-label="deltached — home"
-  >
+  <a class="circle" href={navItems[0].href} aria-label="deltached — home">
     <Logo size={32} />
   </a>
 
@@ -53,7 +49,9 @@ const hasReferences = references.length > 0;
               <a
                 class:list={["link", { active: isActive(pathname, item.href) }]}
                 href={item.href}
-                aria-current={isActive(pathname, item.href) ? "page" : undefined}
+                aria-current={
+                  isActive(pathname, item.href) ? "page" : undefined
+                }
               >
                 {item.label}
               </a>
@@ -65,6 +63,25 @@ const hasReferences = references.length > 0;
   </div>
 
   <div class="external">
+    <button
+      class="circle theme-toggle"
+      type="button"
+      data-theme-toggle
+      aria-label="Toggle dark mode"
+    >
+      <span class="theme-toggle__icons">
+        <Icon
+          name="moon"
+          size={22}
+          class="theme-toggle__icon theme-toggle__icon--moon"
+        />
+        <Icon
+          name="sun"
+          size={22}
+          class="theme-toggle__icon theme-toggle__icon--sun"
+        />
+      </span>
+    </button>
     <a
       class="circle"
       href={REPO}
@@ -119,6 +136,32 @@ const hasReferences = references.length > 0;
     opacity: 0.9;
   }
 
+  /* The icon box has a view-transition-name so it slides on its own during the
+     theme swap (see global.css). */
+  .theme-toggle {
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .theme-toggle__icons {
+    display: grid;
+    place-items: center;
+    view-transition-name: theme-icon;
+  }
+  /* Icons come from the Icon component (its own scope), so match them globally;
+     anchoring under .theme-toggle__icons beats Icon's `.icon { display }`. */
+  .theme-toggle__icons :global(.theme-toggle__icon--sun) {
+    display: none;
+  }
+  :global(html.dark) .theme-toggle__icons :global(.theme-toggle__icon--moon) {
+    display: none;
+  }
+  :global(html.dark) .theme-toggle__icons :global(.theme-toggle__icon--sun) {
+    display: inline-flex;
+  }
+
   .nav__center {
     display: flex;
     align-items: center;
@@ -134,7 +177,7 @@ const hasReferences = references.length > 0;
 
     --refs-height: var(--nav-size);
     --refs-arrow: 2.4rem;
-    --refs-track-max: min(38vw, 24rem);
+    --refs-track-max: min(38vw, 24rem, calc(100vw - 34rem));
     --refs-font: 1.05rem;
     --refs-fade: 1.2rem;
     --refs-pad: 0.85rem;

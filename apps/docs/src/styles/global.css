@@ -23,14 +23,32 @@
   --surface-success: #f0fdf4; /* transient "copied" tint */
   --border: #e6e6e6;
 
+  /* ---- semantic accents -------------------------- */
+  --accent: #0071e3;
+  --accent-press: #0063c6;
+  --success: #34c759;
+  --success-fg: #248a3d;
+  --warning: #ff9500;
+
+  /* ---- grouped fields, separators, secondary text --- */
+  --fill: #f2f2f7;
+  --fill-press: #e7e7ec;
+  --separator: rgba(60, 60, 67, 0.12);
+  --label-2: #6e6e73;
+  --label-3: #8e8e93;
+
+  /* Mixed from --fg, so they adapt to either theme without a dark override. */
+  --chip: color-mix(in srgb, var(--fg) 7%, transparent);
+  --bar: color-mix(in srgb, var(--fg) 2.5%, var(--surface));
+
   /* ---- radius ----------- */
-  --radius-xs: 0.5rem; /* 8px  — chips, tiny controls */
-  --radius-sm: 0.75rem; /* 12px — inputs, list rows */
-  --radius-md: 1rem; /* 16px — cards, command rows */
-  --radius-lg: 1.25rem; /* 20px — modals */
-  --radius-xl: 1.5rem; /* 24px — large surfaces */
-  --radius-2xl: 2rem; /* 32px — hero panel */
-  --radius-pill: 999px; /* pills / circles */
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-pill: 999px;
 
   /* ---- elevation ------------------------------------------------------- */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -66,8 +84,58 @@
   text-rendering: optimizeLegibility;
 }
 
+/* Dark theme — only the palette flips. The class is set before paint by the
+   boot script in Base.astro. */
+.dark {
+  color-scheme: dark;
+
+  --bg: #0a0a0b;
+  --fg: #f5f5f7;
+  --fg-soft: #a1a1a6;
+  --muted: #86868b;
+  --ink: #1c1c1e;
+  --ink-fg: #f5f5f7;
+
+  --surface: #161618;
+  --surface-hover: #202023;
+  --surface-active: #28282b;
+  --surface-success: #0e2a17;
+  --border: #2a2a2d;
+
+  --accent: #0a84ff;
+  --accent-press: #409cff;
+  --success: #30d158;
+  --success-fg: #30d158;
+  --warning: #ff9f0a;
+
+  --fill: #2c2c2e;
+  --fill-press: #3a3a3c;
+  --separator: rgba(235, 235, 245, 0.12);
+  --label-2: #98989d;
+  --label-3: #8e8e93;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 1.5rem 3.5rem rgba(0, 0, 0, 0.65);
+
+  --backdrop-bg: rgba(0, 0, 0, 0.55);
+  --hover-tint: rgba(255, 255, 255, 0.1);
+}
+
 * {
   box-sizing: border-box;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button,
+[role="button"],
+.link,
+[data-modal-open],
+[data-modal-close] {
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 body {
@@ -82,11 +150,6 @@ code,
 pre,
 kbd {
   font-family: "Geist Mono Variable", ui-monospace, monospace;
-  /*
-   * Disable Geist Mono's coding ligatures everywhere code is shown. They fuse
-   * sequences like `<!--`, `-->` and `=>` into single glyphs, which misrepresents
-   * the literal source in docs — what you read must be what you'd type.
-   */
   font-variant-ligatures: none;
   font-feature-settings:
     "liga" 0,
@@ -98,12 +161,6 @@ kbd {
 /* Scrolling                                                               */
 /* ----------------------------------------------------------------------- */
 
-/*
- * Hide the native scrollbar. Lenis drives scrolling and a custom thumb
- * (scrollbar.ts) shows position, so the bar never reserves width — which is
- * what made content jump when it appeared/disappeared. Scrolling itself is
- * untouched (wheel/touch/keyboard still work).
- */
 html {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* legacy Edge */
@@ -193,6 +250,64 @@ html[data-route-nav-transition]::view-transition-new(root) {
   pointer-events: none !important;
 }
 
+/* ----------------------------------------------------------------------- */
+/* Theme toggle — circular reveal + icon swap                              */
+/* ----------------------------------------------------------------------- */
+
+/* Scoped to data-theme-transition (set only while the toggle runs) so it never
+   fires on route navigation, which runs its own root view transition. The new
+   theme is revealed by a circle clipped open from the button — its radius
+   (--theme-r, set in theme.ts) reaches the farthest corner, so it always covers
+   the whole page; the old theme holds still underneath. */
+html[data-theme-transition]::view-transition-old(root) {
+  animation: none;
+}
+html[data-theme-transition]::view-transition-new(root) {
+  animation: theme-reveal 0.5s ease both;
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+  to {
+    clip-path: circle(
+      var(--theme-r, 150vmax) at var(--theme-x, 50%) var(--theme-y, 50%)
+    );
+  }
+}
+
+/* The icon has its own group, so it slides past instead of being revealed by
+   the circle; the overshoot ease gives it the bounce. */
+html[data-theme-transition]::view-transition-old(theme-icon) {
+  animation: theme-icon-out 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+html[data-theme-transition]::view-transition-new(theme-icon) {
+  animation: theme-icon-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes theme-icon-out {
+  to {
+    transform: translateY(-130%);
+    opacity: 0;
+  }
+}
+@keyframes theme-icon-in {
+  from {
+    transform: translateY(130%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme-transition]::view-transition-old(root),
+  html[data-theme-transition]::view-transition-new(root),
+  html[data-theme-transition]::view-transition-old(theme-icon),
+  html[data-theme-transition]::view-transition-new(theme-icon) {
+    animation: none;
+  }
+}
+
 .route-nav-morph {
   position: fixed;
   inset: 0;
@@ -239,12 +354,11 @@ html[data-route-nav-transition]::view-transition-new(root) {
 }
 
 .route-nav-morph__chip > span {
-  grid-area: 1 / 1;
+  position: absolute;
+  inset: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
   padding: 0 var(--refs-link-pad, 0.7rem);
   font-size: var(--refs-font, 0.8rem);
   font-weight: 500;
@@ -413,4 +527,10 @@ html[data-route-nav-transition]::view-transition-new(root) {
 
 .dc-code pre.shiki:focus-visible {
   outline: none;
+}
+
+/* Under .dark, swap each token to the --shiki-dark variable Shiki emits. */
+html.dark .dc-code .shiki,
+html.dark .dc-code .shiki span {
+  color: var(--shiki-dark) !important;
 }

@@ -366,27 +366,35 @@ const timingRows = [
         choice.
       </p>
       <CodeGroup tabs={install} id="install" />
+      <p>
+        Using React, Vue, or Svelte? Add the official wrapper alongside —
+        <code>@deltached/react</code>, <code>@deltached/vue</code>, or
+        <code>@deltached/svelte</code> (for example,
+        <code>npm install @deltached/react deltached gsap</code>). Each wraps
+        this same controller; see <a href="#quick-start">Quick start</a>.
+      </p>
     </section>
 
     {/* ---- Quick start ---------------------------------------------- */}
     <section id="quick-start" class="sec">
       <h2>Quick start</h2>
       <p>
-        Two elements and three calls: construct a transition, drive it on click,
-        and tear it down when the component unmounts. The markup is the same
-        everywhere — the target just starts <code>hidden</code> so it can be
-        measured at rest before it ever paints.
+        A source the panel grows out of, a target that morphs. The JavaScript
+        and Angular tabs wire the vanilla controller against the markup below;
+        React, Vue, and Svelte use their official wrapper, which creates and
+        destroys the controller — and reveals the target — for you.
       </p>
 
       <CodeBlock code={quickStartHtml} lang="html" title="index.html" />
 
       <CodeGroup tabs={quickStart} id="quick-start" />
 
-      <Callout kind="tip" title="Why the hooks?">
+      <Callout kind="tip" title="Revealing the target">
         deltached owns animation and visibility, nothing else. The target has to
-        be in the DOM and measurable when the read phase runs, so you reveal it
-        in <code>beforeEnter</code> and hide it again in <code>afterLeave</code>.
-        That's also where scroll-locking, focus, and mounting belong.
+        be in the DOM and measurable when the read phase runs. The vanilla tabs
+        reveal it in <code>beforeEnter</code> and hide it in
+        <code>afterLeave</code> — also where scroll-locking, focus, and mounting
+        belong; the wrappers do this for you via <code>autoHide</code>.
       </Callout>
     </section>
 
@@ -650,18 +658,12 @@ createDeltachedTransition({
 </Base>
 
 <style>
-  /*
-   * Docs are a single reading column. The Apple-derived --ex-* accents from the
-   * examples page are mirrored here so the shared docs components (tables,
-   * callouts) speak the same palette site-wide.
-   */
+  /* Docs are a single reading column. */
   .page {
-    --ex-accent: #0071e3;
-    --ex-sep: rgba(60, 60, 67, 0.12);
-
     width: min(100%, 52rem);
     margin: 0 auto;
-    padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
+    padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem
+      calc(7rem + env(safe-area-inset-bottom));
   }
 
   .intro {
@@ -671,7 +673,7 @@ createDeltachedTransition({
 
   .eyebrow {
     margin: 0 0 0.6rem;
-    color: var(--ex-accent);
+    color: var(--accent);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -742,7 +744,7 @@ createDeltachedTransition({
   }
 
   .terms li::marker {
-    color: var(--ex-accent);
+    color: var(--accent);
   }
 
   strong {
@@ -755,7 +757,7 @@ createDeltachedTransition({
   }
 
   a {
-    color: var(--ex-accent);
+    color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
@@ -767,7 +769,7 @@ createDeltachedTransition({
   li code {
     padding: 0.08em 0.38em;
     border-radius: var(--radius-xs);
-    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    background: var(--chip);
     color: var(--fg);
     font-family: "Geist Mono Variable", ui-monospace, monospace;
     font-size: 0.85em;
@@ -782,7 +784,7 @@ createDeltachedTransition({
   }
 
   .phases span {
-    color: var(--ex-accent);
+    color: var(--accent);
   }
 
   /* Spacing between stacked docs components. */

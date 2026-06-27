@@ -27,25 +27,34 @@ import { references, sections } from "../examples/registry";
      * sections' global styles inherit them without leaking site-wide.
      */
     .page {
-      --ex-accent: #0071e3;
-      --ex-accent-press: #0063c6;
-      --ex-fill: #f2f2f7; /* systemGray6 — filled fields, grouped rows */
-      --ex-fill-press: #e7e7ec;
-      --ex-sep: rgba(60, 60, 67, 0.12); /* separator */
-      --ex-label-2: #6e6e73; /* secondaryLabel */
-      --ex-label-3: #8e8e93; /* tertiaryLabel */
+      --ex-accent: var(--accent);
+      --ex-accent-press: var(--accent-press);
+      --ex-fill: var(--fill);
+      --ex-fill-press: var(--fill-press);
+      --ex-sep: var(--separator);
+      --ex-label-2: var(--label-2);
+      --ex-label-3: var(--label-3);
       --ex-radius: 12px;
       --ex-radius-lg: 18px;
       --ex-radius-sm: 9px;
       --ex-shadow:
         0 16px 40px -12px rgba(0, 0, 0, 0.22),
-        0 0 0 0.5px rgba(0, 0, 0, 0.04);
+        0 0 0 0.5px var(--separator);
 
       display: grid;
       gap: 4rem;
       width: min(100%, 60rem);
       margin: 0 auto;
-      padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem 7rem;
+      padding: clamp(2.5rem, 7vh, 4.5rem) 1.25rem
+        calc(7rem + env(safe-area-inset-bottom));
+    }
+
+    /* A black drop shadow is invisible on a dark page; deepen it, and the
+       hairline ring carries the edge. */
+    :global(html.dark) .page {
+      --ex-shadow:
+        0 16px 40px -12px rgba(0, 0, 0, 0.6),
+        0 0 0 0.5px var(--separator);
     }
 
     .intro {

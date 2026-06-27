@@ -177,7 +177,7 @@ const albums = [
 </style>
 
 <style is:global>
-  .ex-album .modal__panel {
+  .modal.ex-album .modal__panel {
     width: min(100% - 2rem, 40rem);
   }
 
@@ -221,12 +221,12 @@ const albums = [
   }
 
   /* Lightbox: chrome-light panel sized to the photo. */
-  .ex-light .modal__backdrop {
+  .modal.ex-light .modal__backdrop {
     background: rgba(0, 0, 0, 0.82);
     backdrop-filter: blur(0.4rem);
   }
 
-  .ex-light .modal__panel {
+  .modal.ex-light .modal__panel {
     width: auto;
     max-width: min(92vw, 60rem);
     max-height: min(88dvh, 44rem);
@@ -238,7 +238,7 @@ const albums = [
     overflow: visible;
   }
 
-  .ex-light .modal__close {
+  .modal.ex-light .modal__close {
     top: 2rem;
     right: 1rem;
     width: 2rem;
@@ -249,8 +249,8 @@ const albums = [
     -webkit-backdrop-filter: blur(0.6rem);
   }
 
-  .ex-light .modal__close:hover,
-  .ex-light .modal__close:focus-visible {
+  .modal.ex-light .modal__close:hover,
+  .modal.ex-light .modal__close:focus-visible {
     background: rgba(0, 0, 0, 0.65);
     color: #fff;
   }

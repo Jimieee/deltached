@@ -70,6 +70,12 @@ const hasReferences = references.length > 0;
       /* mobile sizing for the shared gooey morph */
       --morph-height: 2.6rem;
       --morph-gap: 0.6rem;
+
+      /* Cap the references track to the space left after the active chip and
+         the prev/next arrows, so the whole pill stays inside the viewport
+         instead of bleeding off the right edge on narrow screens. The ~12rem
+         budget covers the widest chip label plus both arrows and gaps. */
+      --refs-track-max: clamp(4.5rem, calc(100vw - 12rem), 15rem);
     }
   }
 

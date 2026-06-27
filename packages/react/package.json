@@ -1,0 +1,63 @@
+{
+  "name": "@deltached/react",
+  "version": "0.1.0",
+  "description": "React bindings for deltached — a useDeltached hook over the vanilla morph controller.",
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "animation",
+    "deltached",
+    "morph",
+    "react",
+    "shared-element",
+    "transition"
+  ],
+  "homepage": "https://jimieee.github.io/deltached/",
+  "bugs": {
+    "url": "https://github.com/Jimieee/deltached/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jimieee/deltached.git",
+    "directory": "packages/react"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CHANGELOG.md",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepack": "pnpm build",
+    "prepublishOnly": "pnpm typecheck"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "deltached": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
